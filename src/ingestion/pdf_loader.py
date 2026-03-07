@@ -6,6 +6,7 @@ from typing import List
 import fitz  # PyMuPDF
 
 from .models import Document, Page
+from .text_cleaner import clean_text
 
 
 def load_pdf(path: Path) -> Document:
@@ -55,6 +56,7 @@ def load_pdf(path: Path) -> Document:
 
                 # Extract text preserving layout structure
                 text = page.get_text("text", sort=True)
+                text = clean_text(text)
 
                 # Normalize encoding and whitespace
                 text = text.encode("utf-8", errors="replace").decode("utf-8").strip()
