@@ -1,45 +1,91 @@
-# RAG Pix Regulation - Architecture
+# RAG Pix Regulation — Architecture
+
+This document describes the modular architecture for the RAG system that serves fraud prevention analysts, compliance teams, and AI agents with accurate, traceable answers grounded in Brazilian Pix regulatory documents (BCB resolutions, MED 2.0).
+
+---
+
+## System Flow
+
+```
+Regulatory PDFs (BCB, MED 2.0)
+            ↓
+       Parsing
+            ↓
+       Chunking
+            ↓
+      Embeddings
+            ↓
+Vector Database (Weaviate)
+            ↓
+       Retriever
+            ↓
+    Prompt Builder
+            ↓
+           LLM
+            ↓
+  Response + Citations
+            ↓
+Evaluation + Observability (Phoenix)
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **LLM** | meta-llama/Llama-3.2-3B-Instruct |
+| **Embeddings** | BAAI/bge-m3 (multilingual, Portuguese) |
+| **Vector DB** | Weaviate (embedded) |
+| **Observability** | Phoenix + OpenTelemetry |
+| **Application** | Streamlit |
+
+---
 
 ## Repository Structure
 
-This document describes the modular architecture for the RAG system that interprets Brazilian Pix regulatory documents.
-
 ```
 rag-pix-regulation/
-├── data/                 # Datasets
-│   ├── raw/              # Original documents (PDFs, etc.)
+├── data/
+│   ├── raw/              # Original regulatory documents (PDFs)
 │   └── processed/        # Chunked documents, embeddings
-├── src/                  # Core modules
-│   ├── ingestion/        # Document loading and preprocessing
+├── src/
+│   ├── ingestion/        # Document loading and PDF parsing
 │   ├── chunking/         # Document splitting strategies
 │   ├── embeddings/       # Vector representations
 │   ├── retrieval/        # Similarity search
 │   ├── rag/              # RAG pipeline orchestration
-│   ├── evaluation/       # Quality metrics (retrieval, grounding, hallucination)
+│   ├── evaluation/       # Retrieval quality, grounding, hallucination metrics
 │   └── observability/    # Phoenix tracing and monitoring
 ├── scripts/              # Utility and pipeline scripts
-├── notebooks/            # Jupyter notebooks for experimentation
-├── tests/                # Test suite
-├── config/               # Configuration files
+├── notebooks/            # Experimentation and analysis
+├── tests/                # Unit and integration tests
+├── config/               # Configuration (YAML, env templates)
 ├── docs/                 # Project documentation
-└── app/                  # Application layer (API, CLI, web)
+└── app/                  # Streamlit application
 ```
+
+---
 
 ## Module Responsibilities
 
 | Module | Purpose |
 |--------|---------|
-| **ingestion** | Load documents from various sources, parse formats (PDF, etc.) |
-| **chunking** | Split documents into chunks suitable for embedding and retrieval |
+| **ingestion** | Load documents from sources, parse PDFs, extract text and metadata |
+| **chunking** | Split documents into retrieval-optimized chunks with overlap |
 | **embeddings** | Generate vector representations for semantic search |
-| **retrieval** | Similarity search, ranking, and document retrieval |
-| **rag** | Orchestrate retrieval + generation pipeline |
-| **evaluation** | Measure retrieval quality, grounding, hallucination rates |
-| **observability** | Phoenix integration for tracing and monitoring |
+| **retrieval** | Similarity search, ranking, top-k retrieval |
+| **rag** | Orchestrate retrieval + generation, prompt building, citation injection |
+| **evaluation** | Measure Recall@K, Precision@K, grounding, hallucination rates |
+| **observability** | Phoenix integration for tracing, token usage, context inspection |
+
+---
 
 ## Design Principles
 
 - **Separation of concerns**: Each module has a single responsibility
 - **Reproducibility**: Config-driven, versioned data and models
-- **Extensibility**: Modular design allows swapping components (e.g., embedding models, vector stores)
+- **Extensibility**: Modular design allows swapping components (embedding models, vector stores, LLMs)
 - **Testability**: Unit tests per module, integration tests for pipelines
+- **Traceability**: Responses cite source documents for audit and compliance
+- **Observability**: Phoenix tracing for debugging and performance analysis

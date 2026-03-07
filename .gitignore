@@ -27,6 +27,6 @@ build/
 *.egg-info/
 *.egg
 
-# Data (optional - uncomment if raw/processed should not be committed)
-# data/raw/*
-# data/processed/*
+# Datasets (raw documents, processed outputs)
+data/raw/
+data/processed/
