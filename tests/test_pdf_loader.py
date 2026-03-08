@@ -46,10 +46,31 @@ def test_document_model_full_text() -> None:
     doc = Document(
         source_file=Path("test.pdf"),
         pages=[
-            Page(page_number=1, text="Page 1", source_file=Path("test.pdf")),
-            Page(page_number=2, text="Page 2", source_file=Path("test.pdf")),
+            Page(
+                document_id="test",
+                page_number=1,
+                text="Page 1",
+                source_file=Path("test.pdf"),
+            ),
+            Page(
+                document_id="test",
+                page_number=2,
+                text="Page 2",
+                source_file=Path("test.pdf"),
+            ),
         ],
         total_pages=2,
     )
 
     assert doc.full_text == "Page 1\n\nPage 2"
+
+
+def test_page_document_id() -> None:
+    """Page stores document_id for tracing and citation."""
+    page = Page(
+        document_id="X_ManualOperacionaldoDICT",
+        page_number=1,
+        text="text",
+        source_file=Path("X_ManualOperacionaldoDICT.pdf"),
+    )
+    assert page.document_id == "X_ManualOperacionaldoDICT"

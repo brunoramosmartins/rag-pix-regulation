@@ -1,11 +1,11 @@
 """PDF ingestion utilities using PyMuPDF."""
 
 from pathlib import Path
-from typing import List
 
 import fitz  # PyMuPDF
 
 from .models import Document, Page
+from .metadata_extractor import enrich_page_metadata
 from .text_cleaner import clean_text
 
 
@@ -47,7 +47,7 @@ def load_pdf(path: Path) -> Document:
     if path.suffix.lower() != ".pdf":
         raise ValueError(f"Expected a PDF file, got: {path.suffix}")
 
-    pages: List[Page] = []
+    pages: list[Page] = []
 
     try:
         with fitz.open(path) as pdf:
@@ -56,16 +56,20 @@ def load_pdf(path: Path) -> Document:
 
                 # Extract text preserving layout structure
                 text = page.get_text("text", sort=True)
-                text = clean_text(text)
+                text = text.encode("utf-8", errors="replace").decode("utf-8")
+                text = clean_text(text).strip()
 
-                # Normalize encoding and whitespace
-                text = text.encode("utf-8", errors="replace").decode("utf-8").strip()
+                # Extract structural metadata
+                section_title, article_numbers = enrich_page_metadata(text)
 
                 pages.append(
                     Page(
+                        document_id=path.stem,
                         page_number=page_index + 1,
                         text=text,
                         source_file=path,
+                        section_title=section_title,
+                        article_numbers=article_numbers,
                     )
                 )
 
@@ -79,7 +83,7 @@ def load_pdf(path: Path) -> Document:
     )
 
 
-def load_pdfs_from_dir(directory: Path) -> List[Document]:
+def load_pdfs_from_dir(directory: Path) -> list[Document]:
     """
     Load and parse all PDF documents in a directory.
 
@@ -103,7 +107,7 @@ def load_pdfs_from_dir(directory: Path) -> List[Document]:
     if not directory.is_dir():
         raise NotADirectoryError(f"Not a directory: {directory}")
 
-    documents: List[Document] = []
+    documents: list[Document] = []
 
     for pdf_path in sorted(directory.glob("*.pdf")):
         documents.append(load_pdf(pdf_path))

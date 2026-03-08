@@ -21,10 +21,22 @@ load_pdfs_from_dir
 
 from .models import Document, Page
 from .pdf_loader import load_pdf, load_pdfs_from_dir
+from .serializer import (
+    document_to_records,
+    generate_document_id,
+    page_to_record,
+    save_documents_jsonl,
+    save_records_jsonl,
+)
 
 __all__ = [
     "Document",
     "Page",
     "load_pdf",
     "load_pdfs_from_dir",
+    "generate_document_id",
+    "page_to_record",
+    "document_to_records",
+    "save_records_jsonl",
+    "save_documents_jsonl",
 ]

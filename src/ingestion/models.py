@@ -1,7 +1,7 @@
 """Data models representing parsed regulatory documents."""
 
 from pathlib import Path
-from typing import List
+from typing import Iterable
 
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 
@@ -11,9 +11,15 @@ class Page(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
+    document_id: str = Field(
+        ...,
+        description="Stable identifier derived from source_file.stem for tracing and citation.",
+    )
     page_number: int = Field(..., ge=1, description="1-based page index within the source document.")
     text: str = Field(..., description="Extracted textual content of the page.")
     source_file: Path = Field(..., description="Path to the source PDF file.")
+    section_title: str | None = Field(default=None, description="Section title when detected (e.g. '1 Chaves Pix').")
+    article_numbers: list[str] = Field(default_factory=list, description="Article markers found on page (e.g. ['Art. 1º', '§2º']).")
 
 
 class Document(BaseModel):
@@ -27,7 +33,7 @@ class Document(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     source_file: Path = Field(..., description="Path to the source PDF file.")
-    pages: List[Page] = Field(default_factory=list, description="List of extracted pages.")
+    pages: list[Page] = Field(default_factory=list, description="List of extracted pages.")
     total_pages: int = Field(..., ge=0, description="Total number of pages in the document.")
 
     @model_validator(mode="after")
@@ -44,6 +50,6 @@ class Document(BaseModel):
         """Concatenate the text of all pages."""
         return "\n\n".join(page.text for page in self.pages)
 
-    def iter_pages(self):
+    def iter_pages(self) -> Iterable[Page]:
         """Iterate over document pages."""
         yield from self.pages
