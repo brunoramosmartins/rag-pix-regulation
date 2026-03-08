@@ -1,24 +1,26 @@
-"""Semantic search over indexed regulatory chunks."""
+"""Semantic vector search over indexed regulatory chunks."""
 
 from typing import Any
 
-from src.embeddings.embedding_generator import DEFAULT_MODEL, get_embedding_model
+from src.embeddings.validation import BGE_M3_DIMENSIONS
 from src.vectorstore.weaviate_client import CHUNK_COLLECTION, get_weaviate_client
 
 
-def search(
-    query: str,
+def vector_search(
+    query_vector: list[float],
     top_k: int = 5,
-    model_name: str = DEFAULT_MODEL,
 ) -> list[dict[str, Any]]:
     """
-    Execute semantic search over indexed chunks.
+    Execute vector similarity search in Weaviate.
 
-    Returns list of dicts with chunk metadata and text.
+    Receives pre-computed query vector. Does not perform query embedding.
+    Returns list of results with metadata and similarity score.
     """
-    model = get_embedding_model(model_name)
-    query_vector = model.encode([query], normalize_embeddings=False)[0].tolist()
-
+    if len(query_vector) != BGE_M3_DIMENSIONS:
+        raise ValueError(
+            f"Invalid embedding dimension: expected {BGE_M3_DIMENSIONS}, "
+            f"got {len(query_vector)}"
+        )
     client = get_weaviate_client()
     collection = client.collections.get(CHUNK_COLLECTION)
 
