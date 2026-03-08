@@ -83,6 +83,7 @@ Evaluation + Observability (Phoenix)
 rag-pix-regulation/
 ├── data/
 │   ├── raw/              # Original regulatory documents (PDFs)
+│   ├── evaluation/       # Retrieval evaluation dataset
 │   └── processed/        # Chunked documents, embeddings
 ├── src/
 │   ├── ingestion/        # Document loading and PDF parsing
@@ -213,6 +214,16 @@ The chunk dataset (`corpus_chunks.jsonl`) uses one JSON object per line:
 | `source_file` | string | Source PDF filename |
 | `text` | string | Chunk text content |
 | `token_count` | int | Number of tokens |
+
+### Retrieval Evaluation
+
+Evaluate the retriever with Precision@K and Recall@K:
+
+```bash
+python scripts/evaluate_retrieval.py
+```
+
+Populate `data/evaluation/retrieval_dataset.json` with `relevant_chunks` (chunk_ids) for each query to enable metrics. Run `demo_retrieval.py` to identify relevant chunks, then add their IDs to the dataset.
 
 ### Configuration
 
