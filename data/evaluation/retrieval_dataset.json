@@ -1,0 +1,29 @@
+{
+  "queries": [
+    {
+      "query_id": "q1",
+      "query": "Como funciona o cadastro de chave Pix?",
+      "relevant_chunks": []
+    },
+    {
+      "query_id": "q2",
+      "query": "Regras para devolução por fraude",
+      "relevant_chunks": []
+    },
+    {
+      "query_id": "q3",
+      "query": "Processo de portabilidade de chave Pix",
+      "relevant_chunks": []
+    },
+    {
+      "query_id": "q4",
+      "query": "Quais são os limites de transação do Pix?",
+      "relevant_chunks": []
+    },
+    {
+      "query_id": "q5",
+      "query": "Como solicitar estorno de transação Pix?",
+      "relevant_chunks": []
+    }
+  ]
+}
