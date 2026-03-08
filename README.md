@@ -88,6 +88,7 @@ rag-pix-regulation/
 │   ├── ingestion/        # Document loading and PDF parsing
 │   ├── chunking/         # Document splitting strategies
 │   ├── embeddings/       # Vector representations
+│   ├── vectorstore/      # Weaviate client and indexing
 │   ├── retrieval/        # Similarity search
 │   ├── rag/              # RAG pipeline orchestration
 │   ├── evaluation/       # Retrieval quality, grounding, hallucination metrics
@@ -149,6 +150,69 @@ rag-pix-regulation/
    pip list
    python -c "import sentence_transformers; import weaviate; import phoenix; import streamlit; print('OK')"
    ```
+
+### Weaviate (Vector Database)
+
+For embedding and retrieval, run Weaviate locally:
+
+```bash
+docker compose up -d
+```
+
+Then run the full pipeline (or use the single script below):
+
+```bash
+python scripts/run_ingestion.py   # PDF → corpus_pages.jsonl
+python scripts/run_chunking.py   # pages → corpus_chunks.jsonl
+python scripts/init_weaviate.py  # Create collection schema
+python scripts/run_indexing.py   # Chunks → embeddings → Weaviate
+python scripts/demo_retrieval.py # Demo semantic search
+```
+
+**Single-command pipeline:**
+
+```bash
+python scripts/run_pipeline.py   # Runs ingestion → chunking → init_weaviate → indexing
+```
+
+### Data Pipeline
+
+```
+PDF (data/raw/)
+       ↓
+Parsing + Cleaning + Metadata
+       ↓
+corpus_pages.jsonl
+       ↓
+Structural segmentation
+       ↓
+Token chunking
+       ↓
+corpus_chunks.jsonl
+       ↓
+Embeddings (BGE-M3)
+       ↓
+Vector indexing (Weaviate)
+       ↓
+Semantic retrieval
+```
+
+### Dataset Format
+
+The chunk dataset (`corpus_chunks.jsonl`) uses one JSON object per line:
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `chunk_id` | string | Deterministic ID: `{document_id}_p{page}_s{segment}_c{chunk}` |
+| `document_id` | string | Source document identifier |
+| `page_number` | int | 1-based page index |
+| `segment_index` | int | Segment index within page |
+| `chunk_index` | int | Chunk index within segment |
+| `section_title` | string | Section title (e.g. "1 Chaves Pix") |
+| `article_numbers` | list | Article markers (e.g. ["Art. 1º", "§2º"]) |
+| `source_file` | string | Source PDF filename |
+| `text` | string | Chunk text content |
+| `token_count` | int | Number of tokens |
 
 ### Configuration
 
