@@ -1,9 +1,7 @@
 """Unit tests for token-based chunking."""
 
-from pathlib import Path
-
 from src.chunking import chunk_segment, chunk_segments, chunk_records
-from src.chunking.models import Chunk, StructuralSegment
+from src.chunking.models import StructuralSegment
 from src.chunking.token_chunker import (
     _count_tokens,
     _generate_chunk_id,
@@ -114,7 +112,6 @@ def test_chunk_id_format() -> None:
 
 def test_chunk_token_limit() -> None:
     """No chunk exceeds chunk_size tokens."""
-    tokenizer = _get_tokenizer()
     long_text = "token " * 400
     segment = StructuralSegment(
         document_id="doc",

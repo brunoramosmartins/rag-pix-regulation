@@ -96,7 +96,7 @@ def test_save_chunks_jsonl_streaming() -> None:
         count = save_chunks_jsonl(chunk_gen(), path)
         assert count == 2
         with open(path, encoding="utf-8") as f:
-            lines = [l for l in f if l.strip()]
+            lines = [line for line in f if line.strip()]
         assert len(lines) == 2
 
 
