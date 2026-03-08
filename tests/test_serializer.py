@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from src.ingestion.models import Document, Page
 from src.ingestion.serializer import (
     document_to_records,

@@ -1,7 +1,5 @@
 """Unit tests for metadata extraction."""
 
-import pytest
-
 from src.ingestion.metadata_extractor import (
     enrich_page_metadata,
     extract_article_markers,
