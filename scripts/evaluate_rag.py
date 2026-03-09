@@ -8,6 +8,9 @@ Run from project root:
     python scripts/evaluate_rag.py
 
 Requires: Weaviate (and Ollama for full RAG evaluation).
+
+For Phoenix traces: start Phoenix first (python -m phoenix.server.main serve),
+then run this script. Traces appear at http://localhost:6006
 """
 
 import logging
@@ -16,6 +19,13 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Register Phoenix tracer BEFORE any RAG/pipeline imports (sends traces to Phoenix)
+try:
+    from phoenix.otel import register
+    register(project_name="rag-pix-regulation", auto_instrument=False)
+except ImportError:
+    pass  # Phoenix optional; evaluation runs without traces
 
 from src.evaluation.evaluation_runner import (
     export_report,
