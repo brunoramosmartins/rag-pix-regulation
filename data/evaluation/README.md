@@ -1,6 +1,17 @@
-# Retrieval Evaluation Dataset
+# Evaluation Datasets
 
-To enable Precision@K and Recall@K metrics, populate `retrieval_dataset.json` with ground truth.
+## Canonical Dataset (`rag_evaluation_dataset.json`)
+
+Single source for retrieval and RAG evaluation — Manual Operacional do DICT.
+
+Each query includes:
+
+- `query` — natural language question
+- `expected_pages` — page numbers where answer is grounded (for retrieval metrics)
+- `expected_documents` — document IDs (e.g. manual_dict)
+- `expected_answer_summary` — ground truth for groundedness
+- `key_concepts` — checklist for answer completeness
+- `relevant_sources` — section and pages for reference
 
 ## Workflow
 
@@ -9,23 +20,22 @@ To enable Precision@K and Recall@K metrics, populate `retrieval_dataset.json` wi
    python scripts/run_pipeline.py
    ```
 
-2. **Run retrieval demo** to see returned chunks
+2. **Run retrieval evaluation**
    ```bash
-   python scripts/demo_retrieval.py
+   python scripts/evaluate_retrieval.py
    ```
 
-3. **Identify relevant chunks** for each query from the output (inspect `chunk_id` values)
+3. **Run full RAG evaluation** (requires Ollama)
+   ```bash
+   python scripts/evaluate_rag.py
+   ```
 
-4. **Add chunk IDs** to `retrieval_dataset.json` in the `relevant_chunks` array for each query
+4. **View report**
+   ```bash
+   cat reports/evaluation_report.json
+   ```
 
-## Example
+## Metrics
 
-```json
-{
-  "query_id": "q1",
-  "query": "Como funciona o cadastro de chave Pix?",
-  "relevant_chunks": ["manual_dict_p5_s0_c0", "manual_dict_p6_s1_c0"]
-}
-```
-
-Chunk IDs follow the format: `{document_id}_p{page}_s{segment}_c{chunk}`.
+- **Retrieval:** Precision@K, Recall@K (page-based relevance)
+- **RAG:** citation coverage, groundedness, hallucination rate

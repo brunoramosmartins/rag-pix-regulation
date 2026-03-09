@@ -1,0 +1,162 @@
+{
+  "description": "Canonical evaluation dataset — Manual Operacional do DICT. Single source for retrieval and RAG evaluation.",
+  "source_corpus": "manual_dict",
+  "queries": [
+    {
+      "query_id": "eq1",
+      "query": "O que é o processo de Recuperação de Valores no Pix e qual é seu objetivo?",
+      "expected_pages": [122],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "A Recuperação de Valores é um mecanismo utilizado para rastrear, bloquear e eventualmente devolver recursos associados a transações Pix suspeitas de fraude ou golpe.",
+      "key_concepts": [
+        "rastreamento de transações",
+        "bloqueio de recursos",
+        "devolução à vítima",
+        "processo iniciado pelo PSP do pagador"
+      ],
+      "relevant_sources": [
+        {"section": "20", "section_title": "Fluxo de Recuperação de Valores", "pages": [122]}
+      ]
+    },
+    {
+      "query_id": "eq2",
+      "query": "Quais são as principais etapas do processo de Recuperação de Valores no DICT?",
+      "expected_pages": [123, 124],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "O processo inclui as etapas: instauração, rastreamento, priorização, bloqueio, análise e devolução.",
+      "key_concepts": [
+        "fluxo estruturado",
+        "investigação da fraude",
+        "bloqueio preventivo de recursos"
+      ],
+      "relevant_sources": [
+        {"section": "20.1", "section_title": "Regras gerais", "pages": [123, 124]}
+      ]
+    },
+    {
+      "query_id": "eq3",
+      "query": "Quais são os possíveis estados de uma Recuperação de Valores no DICT?",
+      "expected_pages": [122],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "Uma Recuperação de Valores pode ter os seguintes estados: CREATED, TRACKED, AWAITING_ANALYSIS, ANALYSED, REFUNDING, COMPLETED, CANCELLED.",
+      "key_concepts": [
+        "estados do processo",
+        "controle do fluxo da recuperação"
+      ],
+      "relevant_sources": [
+        {"section": "20", "section_title": "Fluxo de Recuperação de Valores", "pages": [122]}
+      ]
+    },
+    {
+      "query_id": "eq4",
+      "query": "Quem pode abrir uma notificação de infração para solicitação de devolução?",
+      "expected_pages": [69],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "A notificação de infração para solicitação de devolução pode ser aberta apenas pelo PSP do pagador quando há suspeita de fraude em uma transação Pix.",
+      "key_concepts": [
+        "PSP do pagador",
+        "suspeita de fraude",
+        "recuperação de valores"
+      ],
+      "relevant_sources": [
+        {"section": "10.1", "section_title": "Notificação de infração", "pages": [69]}
+      ]
+    },
+    {
+      "query_id": "eq5",
+      "query": "Quais são os estados possíveis de uma notificação de infração no DICT?",
+      "expected_pages": [69],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "Uma notificação de infração pode estar nos estados: aberta, recebida, analisada/concluída/fechada, cancelada.",
+      "key_concepts": [
+        "fluxo de tratamento de infração",
+        "análise por PSP"
+      ],
+      "relevant_sources": [
+        {"section": "10.1", "pages": [69]}
+      ]
+    },
+    {
+      "query_id": "eq6",
+      "query": "Em que situações pode ser criada uma marcação de fraude transacional no DICT?",
+      "expected_pages": [84],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "A marcação de fraude pode ser criada quando um PSP identifica que um usuário está envolvido em fraude, como golpes, transações não autorizadas ou contas utilizadas para receber recursos ilícitos.",
+      "key_concepts": [
+        "fraude transacional",
+        "marcação de usuário fraudador",
+        "identificação de CPF/CNPJ"
+      ],
+      "relevant_sources": [
+        {"section": "10.2", "section_title": "Marcação de fraude transacional", "pages": [84]}
+      ]
+    },
+    {
+      "query_id": "eq7",
+      "query": "Quais informações devem ser fornecidas ao criar uma marcação de fraude transacional no DICT?",
+      "expected_pages": [84],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "Devem ser informados: CPF ou CNPJ do usuário suspeito, chave Pix (quando conhecida), tipo de fraude e informações adicionais sobre o caso.",
+      "key_concepts": [
+        "identificação do usuário",
+        "tipo de fraude",
+        "documentação da suspeita"
+      ],
+      "relevant_sources": [
+        {"section": "10.2", "pages": [84]}
+      ]
+    },
+    {
+      "query_id": "eq8",
+      "query": "Qual é o prazo para que o PSP do pagador inicie uma solicitação de devolução após a conclusão da notificação de infração?",
+      "expected_pages": [105],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "O PSP do pagador tem até 72 horas após a conclusão da notificação de infração para iniciar a solicitação de devolução.",
+      "key_concepts": [
+        "prazo de 72 horas",
+        "início da solicitação de devolução",
+        "fluxo de fraude"
+      ],
+      "relevant_sources": [
+        {"section": "17.2", "section_title": "Solicitação de devolução por fraude", "pages": [105]}
+      ]
+    },
+    {
+      "query_id": "eq9",
+      "query": "O valor solicitado para devolução em um processo de fraude pode ser maior que o valor da transação original?",
+      "expected_pages": [106],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "Não. O valor solicitado para devolução deve ser igual ou menor que o valor da transação original.",
+      "key_concepts": [
+        "limite de devolução",
+        "valor da transação original"
+      ],
+      "relevant_sources": [
+        {"section": "17", "section_title": "Fluxo de devolução", "pages": [106]}
+      ]
+    },
+    {
+      "query_id": "eq10",
+      "query": "O que acontece quando uma solicitação de devolução é concluída no DICT?",
+      "expected_pages": [106, 107],
+      "expected_documents": ["manual_dict"],
+      "expected_answer_summary": "A solicitação é marcada como concluída no DICT com um dos seguintes resultados: aceita total, aceita parcial ou rejeitada. O PSP do pagador consulta periodicamente essas solicitações concluídas.",
+      "key_concepts": [
+        "estados finais da devolução",
+        "comunicação entre PSPs",
+        "consulta periódica no DICT"
+      ],
+      "relevant_sources": [
+        {"section": "17", "section_title": "Fluxo de devolução", "pages": [106, 107]}
+      ]
+    }
+  ],
+  "evaluation_dimensions": {
+    "retrieval_relevance": "all",
+    "citation_correctness": "eq1-eq10",
+    "multi_chunk_reasoning": ["eq2", "eq10"],
+    "process_understanding": ["eq1", "eq2", "eq3"],
+    "fraud_rules": ["eq4", "eq6", "eq7"],
+    "procedural_constraints": ["eq8", "eq9"]
+  }
+}
