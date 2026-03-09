@@ -1,6 +1,30 @@
-# Retrieval Evaluation Dataset
+# Evaluation Datasets
+
+## Retrieval Evaluation (`retrieval_dataset.json`)
 
 To enable Precision@K and Recall@K metrics, populate `retrieval_dataset.json` with ground truth.
+
+## RAG Evaluation (`rag_queries.json`)
+
+For RAG context grounding: does retrieved context contain the expected documents?
+
+Structure:
+```json
+{
+  "queries": [
+    {
+      "query_id": "rq1",
+      "query": "Como funciona o cadastro de chave Pix?",
+      "expected_documents": ["manual_dict"]
+    }
+  ]
+}
+```
+
+Run evaluation:
+```bash
+python scripts/evaluate_rag.py
+```
 
 ## Workflow
 
