@@ -1,5 +1,6 @@
 """RAG pipeline orchestration."""
 
+import json
 from dataclasses import dataclass
 from typing import Callable
 
@@ -16,6 +17,19 @@ except ImportError:
     def trace_span(name: str, attributes=None):
         from contextlib import nullcontext
         return nullcontext()
+
+# OpenInference attribute names for Phoenix
+INPUT_VALUE = "input.value"
+OUTPUT_VALUE = "output.value"
+SPAN_KIND = "openinference.span.kind"
+
+MAX_ATTR_LEN = 4000
+
+
+def _truncate(s: str, max_len: int = MAX_ATTR_LEN) -> str:
+    if len(s) <= max_len:
+        return s
+    return s[:max_len] + "...[truncated]"
 
 
 @dataclass
@@ -57,14 +71,32 @@ def answer_query(
     Answer a query using RAG: retrieve → build context → prompt → generate.
     """
     retrieve_fn = retriever or _default_retrieve
-    with trace_span("retrieval", {"query": query[:100]}):
+
+    with trace_span("retrieval", {INPUT_VALUE: query, SPAN_KIND: "RETRIEVER"}) as span:
         chunks = retrieve_fn(query, top_k)
-    with trace_span("context_building"):
+        if span and span.is_recording():
+            refs = [f"{c.document_id} p.{c.page_number}" for c in chunks]
+            span.set_attribute(OUTPUT_VALUE, json.dumps({"count": len(chunks), "refs": refs}))
+
+    with trace_span("context_building", {SPAN_KIND: "CHAIN"}) as span:
         context = build_context(chunks, max_chunks=max_chunks, max_tokens=max_context_tokens)
-    with trace_span("prompt_construction"):
+        if span and span.is_recording():
+            span.set_attribute(INPUT_VALUE, json.dumps({"chunk_count": len(chunks)}))
+            span.set_attribute(OUTPUT_VALUE, _truncate(context))
+
+    with trace_span("prompt_construction", {SPAN_KIND: "PROMPT"}) as span:
         prompt = build_prompt(context, query)
-    with trace_span("llm_generation", {"query": query[:100]}):
+        if span and span.is_recording():
+            span.set_attribute(INPUT_VALUE, _truncate(f"context_len={len(context)}, query={query[:200]}"))
+            span.set_attribute(OUTPUT_VALUE, _truncate(prompt))
+
+    with trace_span("llm_generation", {INPUT_VALUE: _truncate(prompt), SPAN_KIND: "LLM"}) as span:
         answer, usage = llm.generate(prompt)
+        if span and span.is_recording():
+            span.set_attribute(OUTPUT_VALUE, _truncate(answer))
+            if usage:
+                span.set_attribute("llm.token_count.prompt", usage.prompt_tokens)
+                span.set_attribute("llm.token_count.completion", usage.completion_tokens)
     citations = _build_citations(chunks)
 
     return RAGResponse(

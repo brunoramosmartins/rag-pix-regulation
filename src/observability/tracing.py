@@ -37,22 +37,33 @@ def _ensure_phoenix_registered() -> bool:
         return False
 
 
+def _truncate(s: str, max_len: int = 4000) -> str:
+    """Truncate string for span attributes (OTEL has limits)."""
+    if len(s) <= max_len:
+        return s
+    return s[:max_len] + "...[truncated]"
+
+
 @contextmanager
-def trace_span(name: str, attributes: dict[str, Any] | None = None) -> Generator[None, None, None]:
+def trace_span(
+    name: str,
+    attributes: dict[str, Any] | None = None,
+) -> Generator[Any, None, None]:
     """
     Context manager for a traced span.
 
-    If tracing is unavailable, yields without doing anything.
+    Yields the span so caller can set output attributes after the operation.
+    If tracing is unavailable, yields None.
     """
     tracer = _get_tracer()
     if tracer is None:
-        yield
+        yield None
         return
 
-    attrs = attributes or {}
+    attrs = dict(attributes or {})
     with tracer.start_as_current_span(name, attributes=attrs) as span:
         try:
-            yield
+            yield span
         except Exception as e:
             if span.is_recording():
                 try:
