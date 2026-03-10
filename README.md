@@ -234,6 +234,14 @@ streamlit run app/streamlit_app.py
 
 The demo shows side-by-side responses, citations, and retrieved context chunks.
 
+**Optional — Phoenix traces:** To visualize RAG chain spans (retrieval, context, prompt, LLM) in Phoenix, start it in another terminal before launching the demo:
+
+```bash
+python -m phoenix.server.main serve
+```
+
+Then open http://localhost:6006 to inspect traces. The demo registers with Phoenix automatically when it is available.
+
 ### Evaluation
 
 See [docs/EVALUATION.md](docs/EVALUATION.md) for the full evaluation workflow.

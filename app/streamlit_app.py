@@ -9,6 +9,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Register Phoenix tracer before RAG imports (optional; traces at http://localhost:6006)
+try:
+    from phoenix.otel import register
+    register(project_name="rag-pix-regulation", auto_instrument=False)
+except ImportError:
+    pass
+
 import streamlit as st
 
 from src.demo import get_demo_health, run_baseline_query, run_rag_query
