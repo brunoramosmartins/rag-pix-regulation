@@ -15,11 +15,18 @@ class Page(BaseModel):
         ...,
         description="Stable identifier derived from source_file.stem for tracing and citation.",
     )
-    page_number: int = Field(..., ge=1, description="1-based page index within the source document.")
+    page_number: int = Field(
+        ..., ge=1, description="1-based page index within the source document."
+    )
     text: str = Field(..., description="Extracted textual content of the page.")
     source_file: Path = Field(..., description="Path to the source PDF file.")
-    section_title: str | None = Field(default=None, description="Section title when detected (e.g. '1 Chaves Pix').")
-    article_numbers: list[str] = Field(default_factory=list, description="Article markers found on page (e.g. ['Art. 1º', '§2º']).")
+    section_title: str | None = Field(
+        default=None, description="Section title when detected (e.g. '1 Chaves Pix')."
+    )
+    article_numbers: list[str] = Field(
+        default_factory=list,
+        description="Article markers found on page (e.g. ['Art. 1º', '§2º']).",
+    )
 
 
 class Document(BaseModel):
@@ -33,8 +40,12 @@ class Document(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     source_file: Path = Field(..., description="Path to the source PDF file.")
-    pages: list[Page] = Field(default_factory=list, description="List of extracted pages.")
-    total_pages: int = Field(..., ge=0, description="Total number of pages in the document.")
+    pages: list[Page] = Field(
+        default_factory=list, description="List of extracted pages."
+    )
+    total_pages: int = Field(
+        ..., ge=0, description="Total number of pages in the document."
+    )
 
     @model_validator(mode="after")
     def validate_page_consistency(self):

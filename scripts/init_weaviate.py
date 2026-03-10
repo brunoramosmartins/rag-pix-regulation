@@ -31,7 +31,9 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     """Initialize Weaviate Chunk collection."""
-    parser = argparse.ArgumentParser(description="Initialize Weaviate collection schema")
+    parser = argparse.ArgumentParser(
+        description="Initialize Weaviate collection schema"
+    )
     parser.add_argument(
         "--recreate",
         action="store_true",

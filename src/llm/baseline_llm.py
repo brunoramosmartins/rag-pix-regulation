@@ -29,7 +29,7 @@ class BaselineLLM(LLMClient):
             import ollama
         except ImportError as e:
             raise ImportError(
-                "Ollama Python client required. Install with: pip install ollama"
+                "Ollama Python client required. Install: pip install ollama"
             ) from e
 
         response = ollama.chat(

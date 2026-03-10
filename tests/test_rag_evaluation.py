@@ -2,8 +2,6 @@
 
 from dataclasses import dataclass
 
-import pytest
-
 from src.evaluation.rag_evaluation import (
     compute_citation_coverage,
     detect_hallucination,
@@ -38,7 +36,12 @@ def test_compute_citation_coverage_empty_citations() -> None:
 
 def test_detect_hallucination_abstention() -> None:
     """Answer saying info not available is not hallucination."""
-    assert detect_hallucination("A informacao nao esta disponivel no contexto.", "short ctx", "") is False
+    assert (
+        detect_hallucination(
+            "A informacao nao esta disponivel no contexto.", "short ctx", ""
+        )
+        is False
+    )
 
 
 def test_detect_hallucination_long_answer_short_context() -> None:

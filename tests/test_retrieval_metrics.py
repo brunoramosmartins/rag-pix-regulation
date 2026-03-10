@@ -60,14 +60,18 @@ def test_precision_at_k_by_pages() -> None:
     """Page-based precision: 2 of top-3 pages are expected."""
     retrieved_pages = [1, 2, 5]
     expected_pages = {1, 2}
-    assert precision_at_k_by_pages(retrieved_pages, expected_pages, k=3) == pytest.approx(2 / 3)
+    assert precision_at_k_by_pages(
+        retrieved_pages, expected_pages, k=3
+    ) == pytest.approx(2 / 3)
 
 
 def test_recall_at_k_by_pages() -> None:
     """Page-based recall: 2 of 3 expected pages found."""
     retrieved_pages = [1, 2, 5]
     expected_pages = {1, 2, 3}
-    assert recall_at_k_by_pages(retrieved_pages, expected_pages, k=3) == pytest.approx(2 / 3)
+    assert recall_at_k_by_pages(retrieved_pages, expected_pages, k=3) == pytest.approx(
+        2 / 3
+    )
 
 
 def test_evaluate_retrieval_empty_dataset() -> None:
@@ -77,6 +81,7 @@ def test_evaluate_retrieval_empty_dataset() -> None:
         path = Path(f.name)
 
     try:
+
         def mock_retriever(_):
             return []
 
@@ -106,14 +111,15 @@ def test_load_evaluation_dataset_invalid() -> None:
 def test_evaluate_retrieval_with_ground_truth() -> None:
     """evaluate_retrieval computes metrics using expected_pages (page-based)."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        f.write('''{
+        f.write("""{
             "queries": [
                 {"query_id": "q1", "query": "x", "expected_pages": [1, 2]}
             ]
-        }''')
+        }""")
         path = Path(f.name)
 
     try:
+
         class MockResult:
             def __init__(self, page: int):
                 self.page_number = page

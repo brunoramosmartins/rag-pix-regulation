@@ -47,7 +47,9 @@ def get_expected_pages(query: dict[str, Any]) -> set[int]:
     return pages
 
 
-def get_expected_documents(query: dict[str, Any], default: list[str] | None = None) -> set[str]:
+def get_expected_documents(
+    query: dict[str, Any], default: list[str] | None = None
+) -> set[str]:
     """Extract expected document IDs from query."""
     if "expected_documents" in query:
         return set(query["expected_documents"])

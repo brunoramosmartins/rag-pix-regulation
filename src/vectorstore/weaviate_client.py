@@ -70,7 +70,11 @@ def init_chunk_collection(
                 Property(name="text", data_type=DataType.TEXT),
             ],
         )
-        logger.info("Created collection %s with %d-dim vectors", CHUNK_COLLECTION, BGE_M3_DIMENSIONS)
+        logger.info(
+            "Created collection %s with %d-dim vectors",
+            CHUNK_COLLECTION,
+            BGE_M3_DIMENSIONS,
+        )
     else:
         logger.info("Collection %s already exists", CHUNK_COLLECTION)
 

@@ -15,7 +15,10 @@ from src.ingestion.serializer import (
 
 def test_generate_document_id() -> None:
     """generate_document_id normalizes filename to lowercase with underscores."""
-    assert generate_document_id(Path("X_ManualOperacionaldoDICT.pdf")) == "x_manualoperacionaldodict"
+    assert (
+        generate_document_id(Path("X_ManualOperacionaldoDICT.pdf"))
+        == "x_manualoperacionaldodict"
+    )
     assert generate_document_id(Path("Doc With Spaces.pdf")) == "doc_with_spaces"
 
 

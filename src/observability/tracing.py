@@ -118,7 +118,9 @@ def trace_span(
                 try:
                     from opentelemetry import trace as otel_trace
 
-                    span.set_status(otel_trace.Status(otel_trace.StatusCode.ERROR, str(e)))
+                    span.set_status(
+                        otel_trace.Status(otel_trace.StatusCode.ERROR, str(e))
+                    )
                 except ImportError:
                     pass
             raise

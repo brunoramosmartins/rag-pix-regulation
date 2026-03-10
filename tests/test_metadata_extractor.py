@@ -16,7 +16,10 @@ def test_extract_section_title_simple() -> None:
 def test_extract_section_title_numbered() -> None:
     """extract_section_title detects '3.1 Fluxo de registro' pattern."""
     text = "3.1 Fluxo de registro de chave por solicitação do usuário final"
-    assert extract_section_title(text) == "3.1 Fluxo de registro de chave por solicitação do usuário final"
+    assert (
+        extract_section_title(text)
+        == "3.1 Fluxo de registro de chave por solicitação do usuário final"
+    )
 
 
 def test_extract_section_title_none() -> None:

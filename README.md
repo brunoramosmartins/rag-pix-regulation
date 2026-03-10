@@ -215,15 +215,48 @@ The chunk dataset (`corpus_chunks.jsonl`) uses one JSON object per line:
 | `text` | string | Chunk text content |
 | `token_count` | int | Number of tokens |
 
-### Retrieval Evaluation
+### Demo (Interactive Interface)
 
-Evaluate the retriever with Precision@K and Recall@K:
+Run the Streamlit demo to compare **Baseline LLM** (no retrieval) vs **RAG Pipeline** (with retrieval):
 
+```bash
+streamlit run app/streamlit_app.py
+```
+
+**Prerequisites:** Weaviate running, pipeline indexed, Ollama with `llama3.2:3b` pulled.
+
+**Example queries:**
+- Como funciona o registro de chave Pix?
+- Quais são as regras de devolução por fraude?
+- Como funciona a portabilidade de chave Pix?
+- Quantas chaves Pix posso ter por conta?
+- O que é o DICT no contexto do Pix?
+
+The demo shows side-by-side responses, citations, and retrieved context chunks.
+
+**Optional — Phoenix traces:** To visualize RAG chain spans (retrieval, context, prompt, LLM) in Phoenix, start it in another terminal before launching the demo:
+
+```bash
+python -m phoenix.server.main serve
+```
+
+Then open http://localhost:6006 to inspect traces. The demo registers with Phoenix automatically when it is available.
+
+### Evaluation
+
+See [docs/EVALUATION.md](docs/EVALUATION.md) for the full evaluation workflow.
+
+**Retrieval-only:**
 ```bash
 python scripts/evaluate_retrieval.py
 ```
 
-Populate `data/evaluation/retrieval_dataset.json` with `relevant_chunks` (chunk_ids) for each query to enable metrics. Run `demo_retrieval.py` to identify relevant chunks, then add their IDs to the dataset.
+**Full RAG (requires Ollama):**
+```bash
+python scripts/evaluate_rag.py
+```
+
+**Report:** `reports/evaluation_report.json`
 
 ### Configuration
 
@@ -243,6 +276,16 @@ Place configuration files in `config/`. Parameters such as `embedding_model`, `c
 | **6. RAG Pipeline** | End-to-end question answering | Prompt template, RAG pipeline, baseline comparison |
 | **7. Evaluation & Observability** | Measurable, observable system | Metrics, Phoenix tracing, logs |
 | **8. Demo & Publication** | Portfolio-ready project | Streamlit app, documentation, video, LinkedIn |
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture and module responsibilities |
+| [docs/EVALUATION.md](docs/EVALUATION.md) | Evaluation methodology and workflow |
+| [docs/architecture/](docs/architecture/) | Mermaid diagrams (ingestion, chunking, embedding, retrieval, RAG) |
 
 ---
 

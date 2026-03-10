@@ -32,7 +32,9 @@ def validate_embedding(
 
     for i, x in enumerate(vec):
         if not isinstance(x, (int, float)):
-            raise ValueError(f"Embedding element at index {i} is not numeric: {type(x)}")
+            raise ValueError(
+                f"Embedding element at index {i} is not numeric: {type(x)}"
+            )
         if x != x:  # NaN check
             raise ValueError(f"Embedding contains NaN at index {i}")
 

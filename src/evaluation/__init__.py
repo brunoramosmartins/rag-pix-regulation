@@ -1,6 +1,10 @@
 """Evaluation module - Retrieval quality, grounding, and hallucination metrics."""
 
-from .dataset_loader import get_expected_documents, get_expected_pages, load_evaluation_dataset
+from .dataset_loader import (
+    get_expected_documents,
+    get_expected_pages,
+    load_evaluation_dataset,
+)
 from .rag_evaluation import (
     RAGEvaluationResult,
     compute_citation_coverage,

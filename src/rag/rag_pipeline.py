@@ -1,6 +1,5 @@
 """RAG pipeline orchestration."""
 
-import json
 from dataclasses import dataclass
 from typing import Callable
 
@@ -14,6 +13,7 @@ from .prompt_template import build_prompt
 try:
     from src.observability.tracing import span_set_input, span_set_output, trace_span
 except ImportError:
+
     def trace_span(name: str, attributes=None, openinference_span_kind=None):
         from contextlib import nullcontext
         return nullcontext()
@@ -85,26 +85,6 @@ def answer_query(
 ) -> RAGResponse:
     """
     Answer a query using RAG: retrieve → build context → prompt → generate.
-
-    Parameters
-    ----------
-    query : str
-        User question.
-    llm : LLMClient
-        LLM client implementation.
-    top_k : int
-        Number of chunks to retrieve.
-    max_chunks : int
-        Maximum chunks included in context.
-    max_context_tokens : int | None
-        Token limit for context. Truncates if exceeded.
-    retriever : Callable | None
-        Optional custom retriever function.
-
-    Returns
-    -------
-    RAGResponse
-        Answer, context, retrieved chunks, citations, and token usage.
     """
 
     retrieve_fn = retriever or _default_retrieve
@@ -121,10 +101,7 @@ def answer_query(
                 for i, c in enumerate(chunks):
                     doc_id = c.chunk_id or c.document_id or str(i)
 
-                    span.set_attribute(
-                        f"retrieval.documents.{i}.document.id", doc_id
-                    )
-
+                    span.set_attribute(f"retrieval.documents.{i}.document.id", doc_id)
                     span.set_attribute(
                         f"retrieval.documents.{i}.document.content",
                         _truncate(c.text),
@@ -143,19 +120,12 @@ def answer_query(
                     span,
                     {
                         "count": len(chunks),
-                        "refs": [
-                            f"{c.document_id} p.{c.page_number}"
-                            for c in chunks
-                        ],
+                        "refs": [f"{c.document_id} p.{c.page_number}" for c in chunks],
                     },
                 )
 
         with trace_span("context_building", openinference_span_kind="chain") as span:
-            context = build_context(
-                chunks,
-                max_chunks=max_chunks,
-                max_tokens=max_context_tokens,
-            )
+            context = build_context(chunks, max_chunks=max_chunks, max_tokens=max_context_tokens)
 
             if span and span.is_recording():
                 span_set_input(span, {"chunk_count": len(chunks)})
@@ -165,11 +135,7 @@ def answer_query(
             prompt = build_prompt(context, query)
 
             if span and span.is_recording():
-                span_set_input(
-                    span,
-                    {"context_len": len(context), "query": query[:200]},
-                )
-
+                span_set_input(span, {"context_len": len(context), "query": query[:200]})
                 span_set_output(span, _truncate(prompt))
 
         with trace_span("llm_generation", openinference_span_kind="llm") as span:
@@ -187,25 +153,15 @@ def answer_query(
                 )
 
                 if usage:
-                    span.set_attribute(
-                        "llm.token_count.prompt",
-                        usage.prompt_tokens,
-                    )
-
-                    span.set_attribute(
-                        "llm.token_count.completion",
-                        usage.completion_tokens,
-                    )
+                    span.set_attribute("llm.token_count.prompt", usage.prompt_tokens)
+                    span.set_attribute("llm.token_count.completion", usage.completion_tokens)
 
         answer_with_citations = _format_answer_with_citations(answer, citations)
 
         if parent_span and parent_span.is_recording():
             span_set_output(
                 parent_span,
-                {
-                    "answer": answer_with_citations,
-                    "citations": citations,
-                },
+                {"answer": answer_with_citations, "citations": citations},
             )
 
     return RAGResponse(

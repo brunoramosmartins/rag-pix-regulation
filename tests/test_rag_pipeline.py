@@ -10,9 +10,11 @@ from src.llm import LLMClient
 from src.rag.rag_pipeline import RAGResponse, answer_query
 from src.retrieval.retriever import RetrievalResult
 
+# Import prompt_template directly to avoid pulling in rag_pipeline (sentence_transformers)
+_prompt_path = (
+    Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py"
+)
 
-# Import prompt_template directly to avoid importing heavy RAG dependencies
-_prompt_path = Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py"
 _spec = importlib.util.spec_from_file_location("prompt_template", _prompt_path)
 _prompt_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_prompt_mod)
@@ -79,6 +81,7 @@ def test_answer_query_returns_rag_response() -> None:
 
 def test_answer_query_citations_deterministic() -> None:
     """Citations come from retrieved chunks, not LLM."""
+
     def mock_retrieve(q: str, top_k: int) -> list[RetrievalResult]:
         return [
             _chunk("A", doc="d1", page=1),

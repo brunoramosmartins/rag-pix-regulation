@@ -12,20 +12,6 @@ This script executes the evaluation framework for the RAG system, including:
 Run from project root:
 
     python scripts/evaluate_rag.py
-
-Dependencies:
-
-- Weaviate (required)
-- Ollama / LLM runtime (optional for RAG evaluation)
-- Phoenix (optional for tracing)
-
-If Phoenix tracing is desired:
-
-    python -m phoenix.server.main serve
-
-Traces will appear at:
-
-    http://localhost:6006
 """
 
 import logging
@@ -43,12 +29,7 @@ try:
 except ImportError:
     pass
 
-
-from src.evaluation.evaluation_runner import (
-    export_report,
-    run_full_evaluation,
-)
-
+from src.evaluation.evaluation_runner import export_report, run_full_evaluation
 from src.retrieval import retrieve
 from src.utils.system_checks import (
     check_evaluation_dependencies,
@@ -98,7 +79,7 @@ def main() -> None:
 
         except ImportError as e:
             logger.warning(
-                "RAG generation unavailable, running retrieval-only evaluation: %s",
+                "RAG not available, running retrieval-only evaluation: %s",
                 e,
             )
 
@@ -110,7 +91,7 @@ def main() -> None:
     )
 
     logger.info(
-        "Retrieval metrics: Precision@%d = %.4f | Recall@%d = %.4f",
+        "Retrieval: Precision@%d = %.4f, Recall@%d = %.4f",
         K,
         results["retrieval"].get(f"precision@{K}", 0),
         K,
@@ -119,7 +100,7 @@ def main() -> None:
 
     if results.get("rag"):
         logger.info(
-            "RAG metrics: citation_coverage = %.4f | hallucination_rate = %.4f",
+            "RAG: citation_coverage = %.4f, hallucination_rate = %.4f",
             results["rag"]["citation_coverage"],
             results["rag"]["hallucination_rate"],
         )

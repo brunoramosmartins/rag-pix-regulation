@@ -60,7 +60,9 @@ def validate_text(text: str) -> bool:
     if not text or not text.strip():
         return False
     # Reject if mostly non-printable or replacement chars
-    printable_ratio = sum(1 for c in text if c.isprintable() or c in "\n\t") / max(len(text), 1)
+    printable_ratio = sum(1 for c in text if c.isprintable() or c in "\n\t") / max(
+        len(text), 1
+    )
     return printable_ratio >= 0.9
 
 

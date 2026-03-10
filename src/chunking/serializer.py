@@ -84,8 +84,12 @@ def validate_chunk_record(
             f"chunk_id must follow document_id_pN_sN_cN pattern, got: {chunk_id}"
         )
 
-    if require_char_offsets and ("char_start" not in record or "char_end" not in record):
-        raise ValueError("char_start and char_end required when require_char_offsets=True")
+    if require_char_offsets and (
+        "char_start" not in record or "char_end" not in record
+    ):
+        raise ValueError(
+            "char_start and char_end required when require_char_offsets=True"
+        )
 
 
 def validate_chunk_dataset(
