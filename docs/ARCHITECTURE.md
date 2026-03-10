@@ -89,3 +89,30 @@ rag-pix-regulation/
 - **Testability**: Unit tests per module, integration tests for pipelines
 - **Traceability**: Responses cite source documents for audit and compliance
 - **Observability**: Phoenix tracing for debugging and performance analysis
+
+---
+
+## Architecture Diagrams
+
+Detailed Mermaid diagrams are available in `docs/architecture/`:
+
+| Diagram | Description |
+|---------|-------------|
+| [system_overview.md](architecture/system_overview.md) | High-level flow: query → embed → search → context → prompt → LLM |
+| [ingestion_pipeline.md](architecture/ingestion_pipeline.md) | PDF → parsing → corpus_pages.jsonl |
+| [chunking_pipeline.md](architecture/chunking_pipeline.md) | Pages → structural segmentation → token chunking → corpus_chunks.jsonl |
+| [embedding_indexing_pipeline.md](architecture/embedding_indexing_pipeline.md) | Chunks → BGE-M3 → Weaviate |
+| [retrieval_rag_pipeline.md](architecture/retrieval_rag_pipeline.md) | Retrieval + RAG flow with citations |
+
+---
+
+## Demo Service Layer
+
+The interactive demo (`app/streamlit_app.py`) uses a service layer (`src/demo/demo_service.py`) to:
+
+- Execute baseline queries (LLM without retrieval)
+- Execute RAG queries (retrieve → context → prompt → LLM)
+- Perform health checks (Weaviate, Ollama)
+- Return standardized response objects for the UI
+
+This keeps the UI decoupled from the pipeline implementation.
