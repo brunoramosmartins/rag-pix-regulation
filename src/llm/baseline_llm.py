@@ -10,6 +10,7 @@ class BaselineLLM(LLMClient):
     Local LLM via Ollama.
 
     Uses deterministic settings (temperature=0, top_p=1.0) for reproducibility.
+    Requires Ollama running with the specified model pulled.
     """
 
     def __init__(
@@ -40,18 +41,21 @@ class BaselineLLM(LLMClient):
                 "num_predict": 2048,
             },
         )
+
         content = response.message.content or ""
 
-        # Ollama returns eval_count (completion tokens), prompt_eval_count (prompt tokens)
+        # Ollama returns token usage differently depending on client version
         if isinstance(response, dict):
             prompt_tokens = response.get("prompt_eval_count", 0) or 0
             completion_tokens = response.get("eval_count", 0) or 0
         else:
             prompt_tokens = getattr(response, "prompt_eval_count", None) or 0
             completion_tokens = getattr(response, "eval_count", None) or 0
+
         usage = LLMUsage(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             total_tokens=prompt_tokens + completion_tokens,
         )
+
         return content, usage

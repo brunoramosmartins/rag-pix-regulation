@@ -16,6 +16,20 @@ Rules:
 def build_prompt(context: str, query: str) -> str:
     """
     Build a structured RAG prompt with explicit sections.
+
+    Clear delimiters improve LLM consistency and evaluation reproducibility.
+
+    Parameters
+    ----------
+    context : str
+        Retrieved regulatory context.
+    query : str
+        User question.
+
+    Returns
+    -------
+    str
+        Full prompt ready for the LLM.
     """
     return f"""---
 

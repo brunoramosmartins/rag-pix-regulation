@@ -17,7 +17,8 @@ class LLMClient(ABC):
     """
     Abstract interface for LLM inference.
 
-    Allows swapping between local (Ollama), API (OpenAI), or mock implementations.
+    Allows swapping between local (Ollama), API (OpenAI, Groq), or mock
+    implementations without changing RAG orchestration.
     """
 
     @abstractmethod
@@ -25,9 +26,14 @@ class LLMClient(ABC):
         """
         Generate a completion for the given prompt.
 
+        Parameters
+        ----------
+        prompt : str
+            Full prompt (system + context + user question).
+
         Returns
         -------
         tuple[str, LLMUsage]
-            (answer, token_usage)
+            Model-generated answer and token usage metadata.
         """
         ...

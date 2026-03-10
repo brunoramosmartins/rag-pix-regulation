@@ -27,14 +27,14 @@ def get_weaviate_client(
 
 
 def is_weaviate_ready(host: str = "localhost", port: int = 8080) -> bool:
-    """Check if Weaviate is reachable."""
+    """Check if Weaviate is reachable via REST API."""
+    import requests
+
     try:
-        client = weaviate.connect_to_local(host=host, port=port)
-        ready = client.is_ready()
-        client.close()
-        return ready
+        r = requests.get(f"http://{host}:{port}/v1/meta", timeout=2)
+        return r.status_code == 200
     except Exception as e:
-        logger.debug("Weaviate not ready: %s", e)
+        logger.debug("Weaviate not reachable: %s", e)
         return False
 
 
