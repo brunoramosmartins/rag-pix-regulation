@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.retrieval.models import RetrievalResult
+    from src.retrieval.retriever import RetrievalResult
 
 # Approximate tokens per char for Portuguese (conservative)
 CHARS_PER_TOKEN = 4
@@ -14,7 +14,8 @@ def _count_tokens(text: str) -> int:
     Estimate token count for truncation.
 
     Uses character-based heuristic (1 token ≈ 4 chars) to avoid
-    loading a heavy tokenizer. Sufficient for context size safety.
+    loading a heavy tokenizer. This approximation is sufficient
+    to ensure the constructed context stays within safe limits.
     """
     return len(text) // CHARS_PER_TOKEN
 
@@ -30,18 +31,20 @@ def build_context(
     Parameters
     ----------
     chunks : list[RetrievalResult]
-        Retrieved chunks (ordered by relevance).
+        Retrieved chunks ordered by relevance.
     max_chunks : int, default 5
-        Maximum number of chunks to include.
+        Maximum number of chunks included in the context.
     max_tokens : int | None
-        Maximum total tokens. If exceeded, truncate oldest chunks.
-        If None, no token limit.
+        Maximum token budget for the full context. If exceeded,
+        the context is truncated by removing the least relevant
+        chunks or shortening the last chunk.
 
     Returns
     -------
     str
         Concatenated context with source markers.
     """
+
     limited = chunks[:max_chunks]
     parts: list[str] = []
 
@@ -54,23 +57,23 @@ def build_context(
     if max_tokens is None:
         return context
 
-    current_tokens = _count_tokens(context)
-    if current_tokens <= max_tokens:
+    if _count_tokens(context) <= max_tokens:
         return context
 
-    # Truncate from the end (oldest chunks) until under limit
+    # Remove chunks from the end until under token limit
     for i in range(len(limited) - 1, 0, -1):
-        truncated_parts = parts[:i]
-        truncated_context = "\n\n".join(truncated_parts)
-        if _count_tokens(truncated_context) <= max_tokens:
-            return truncated_context
+        truncated = "\n\n".join(parts[:i])
+        if _count_tokens(truncated) <= max_tokens:
+            return truncated
 
-    # Fallback: truncate last chunk text to fit
+    # Final fallback: truncate the last chunk
     if parts:
         max_chars = max_tokens * CHARS_PER_TOKEN
         prefix = "\n\n".join(parts[:-1])
-        separator = "\n\n" if prefix else ""
-        allowed_last = max_chars - len(prefix) - len(separator)
-        if allowed_last > 0:
-            parts[-1] = parts[-1][:allowed_last].rstrip() + "..."
+        sep = "\n\n" if prefix else ""
+        allowed = max_chars - len(prefix) - len(sep)
+
+        if allowed > 0:
+            parts[-1] = parts[-1][:allowed].rstrip() + "..."
+
     return "\n\n".join(parts)

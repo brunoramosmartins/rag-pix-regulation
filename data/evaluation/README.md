@@ -1,14 +1,61 @@
 # Evaluation Datasets
 
+This project includes multiple datasets used to evaluate retrieval quality and RAG response groundedness.
+
+---
+
 ## Retrieval Evaluation (`retrieval_dataset.json`)
 
-To enable Precision@K and Recall@K metrics, populate `retrieval_dataset.json` with ground truth.
+Dataset used to evaluate **retrieval performance**.
+
+Each query maps to the relevant document chunks that should be returned by the vector search system.
+
+Example schema:
+
+{
+  "queries": [
+    {
+      "query_id": "q1",
+      "query": "How does Pix key registration work?",
+      "relevant_chunk_ids": ["doc_p5_s2_c1"]
+    }
+  ]
+}
+
+Used for computing:
+
+- Precision@K
+- Recall@K
+
+---
+
+## Canonical Dataset (`rag_evaluation_dataset.json`)
+
+Primary dataset used for **combined retrieval and RAG evaluation**.
+
+Source: *Manual Operacional do DICT*.
+
+Each query includes:
+
+- `query` — natural language question
+- `expected_pages` — page numbers where the answer is grounded
+- `expected_documents` — document identifiers (e.g. `manual_dict`)
+- `expected_answer_summary` — reference summary of the expected answer
+- `key_concepts` — checklist of concepts that must appear in the answer
+- `relevant_sources` — reference sections and pages
+
+This dataset is used by the full evaluation pipeline.
+
+---
 
 ## RAG Evaluation (`rag_queries.json`)
 
-For RAG context grounding: does retrieved context contain the expected documents?
+Dataset used for **context grounding validation**.
+
+The evaluation verifies whether retrieved context contains the expected regulatory documents.
 
 Structure:
+
 ```json
 {
   "queries": [
@@ -19,37 +66,3 @@ Structure:
     }
   ]
 }
-```
-
-Run evaluation:
-```bash
-python scripts/evaluate_rag.py
-```
-
-## Workflow
-
-1. **Index your corpus**
-   ```bash
-   python scripts/run_pipeline.py
-   ```
-
-2. **Run retrieval demo** to see returned chunks
-   ```bash
-   python scripts/demo_retrieval.py
-   ```
-
-3. **Identify relevant chunks** for each query from the output (inspect `chunk_id` values)
-
-4. **Add chunk IDs** to `retrieval_dataset.json` in the `relevant_chunks` array for each query
-
-## Example
-
-```json
-{
-  "query_id": "q1",
-  "query": "Como funciona o cadastro de chave Pix?",
-  "relevant_chunks": ["manual_dict_p5_s0_c0", "manual_dict_p6_s1_c0"]
-}
-```
-
-Chunk IDs follow the format: `{document_id}_p{page}_s{segment}_c{chunk}`.

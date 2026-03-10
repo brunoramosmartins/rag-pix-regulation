@@ -1,82 +1,136 @@
 #!/usr/bin/env python
 """
-Evaluate RAG context grounding: does retrieved context contain expected documents?
+Run full RAG evaluation pipeline.
 
-Uses data/evaluation/rag_queries.json with expected_documents per query.
+This script executes the evaluation framework for the RAG system, including:
 
-Run from project root (Weaviate required):
+- retrieval evaluation
+- RAG groundedness evaluation (when LLM available)
+- metric reporting
+- Phoenix tracing (optional)
+
+Run from project root:
 
     python scripts/evaluate_rag.py
+
+Dependencies:
+
+- Weaviate (required)
+- Ollama / LLM runtime (optional for RAG evaluation)
+- Phoenix (optional for tracing)
+
+If Phoenix tracing is desired:
+
+    python -m phoenix.server.main serve
+
+Traces will appear at:
+
+    http://localhost:6006
 """
 
-import json
+import logging
 import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Optional Phoenix tracing
+try:
+    from phoenix.otel import register
+
+    register(project_name="rag-pix-regulation", auto_instrument=False)
+except ImportError:
+    pass
+
+
+from src.evaluation.evaluation_runner import (
+    export_report,
+    run_full_evaluation,
+)
+
 from src.retrieval import retrieve
-from src.vectorstore.weaviate_client import is_weaviate_ready
+from src.utils.system_checks import (
+    check_evaluation_dependencies,
+    check_rag_dependencies,
+)
 
-RAG_QUERIES_PATH = PROJECT_ROOT / "data" / "evaluation" / "rag_queries.json"
+logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
+logger = logging.getLogger(__name__)
 
+DATASET_PATH = PROJECT_ROOT / "data" / "evaluation" / "rag_evaluation_dataset.json"
+REPORTS_DIR = PROJECT_ROOT / "reports"
 
-def load_rag_queries(path: Path) -> list[dict]:
-    """Load RAG evaluation queries."""
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-    return data.get("queries", [])
-
-
-def evaluate_context_grounding(
-    query: str,
-    expected_documents: list[str],
-    top_k: int = 5,
-) -> tuple[bool, set[str]]:
-    """
-    Check if retrieved chunks contain at least one expected document.
-
-    Returns (grounded, retrieved_doc_ids).
-    """
-    results = retrieve(query, top_k=top_k)
-    retrieved_ids = {r.document_id for r in results}
-    expected = set(expected_documents)
-    grounded = bool(retrieved_ids & expected)
-    return grounded, retrieved_ids
+K = 5
 
 
 def main() -> None:
-    """Run RAG context grounding evaluation."""
-    if not is_weaviate_ready():
-        print("ERROR: Weaviate is not running. Run: python scripts/run_indexing.py")
+    """Run evaluation pipeline."""
+
+    if not DATASET_PATH.exists():
+        logger.error("Dataset not found: %s", DATASET_PATH)
         sys.exit(1)
 
-    if not RAG_QUERIES_PATH.exists():
-        print(f"ERROR: {RAG_QUERIES_PATH} not found")
+    ready, msg = check_evaluation_dependencies()
+
+    if not ready:
+        logger.error("%s", msg)
         sys.exit(1)
 
-    queries = load_rag_queries(RAG_QUERIES_PATH)
-    if not queries:
-        print("No queries in rag_queries.json")
-        sys.exit(0)
+    def retriever_fn(query: str):
+        return retrieve(query, top_k=K)
 
-    grounded_count = 0
-    for q in queries:
-        query = q.get("query", "")
-        expected = q.get("expected_documents", [])
-        if not query or not expected:
-            continue
-        grounded, retrieved = evaluate_context_grounding(query, expected)
-        if grounded:
-            grounded_count += 1
-        status = "OK" if grounded else "MISS"
-        print(f"  [{status}] {q.get('query_id', '?')}: {query[:50]}...")
-        print(f"       Expected: {expected}, Retrieved: {retrieved}")
+    rag_fn = None
 
-    total = len([q for q in queries if q.get("expected_documents")])
-    if total:
-        print(f"\nContext grounding: {grounded_count}/{total} queries")
+    rag_ready, rag_msg = check_rag_dependencies()
+
+    if rag_ready:
+        try:
+            from src.llm import BaselineLLM
+            from src.rag.rag_pipeline import answer_query
+
+            llm = BaselineLLM()
+
+            def _rag_fn(q: str):
+                return answer_query(q, llm=llm, top_k=K)
+
+            rag_fn = _rag_fn
+
+        except ImportError as e:
+            logger.warning(
+                "RAG generation unavailable, running retrieval-only evaluation: %s",
+                e,
+            )
+
+    results = run_full_evaluation(
+        DATASET_PATH,
+        retriever_fn,
+        rag_fn,
+        k=K,
+    )
+
+    logger.info(
+        "Retrieval metrics: Precision@%d = %.4f | Recall@%d = %.4f",
+        K,
+        results["retrieval"].get(f"precision@{K}", 0),
+        K,
+        results["retrieval"].get(f"recall@{K}", 0),
+    )
+
+    if results.get("rag"):
+        logger.info(
+            "RAG metrics: citation_coverage = %.4f | hallucination_rate = %.4f",
+            results["rag"]["citation_coverage"],
+            results["rag"]["hallucination_rate"],
+        )
+
+    REPORTS_DIR.mkdir(exist_ok=True)
+
+    report_path = REPORTS_DIR / "evaluation_report.json"
+
+    export_report(results, report_path)
+
+    logger.info("Evaluation report saved to %s", report_path)
 
 
 if __name__ == "__main__":

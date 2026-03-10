@@ -1,6 +1,6 @@
 """Ollama-based LLM implementation for local development."""
 
-from .llm_client import LLMClient
+from .llm_client import LLMClient, LLMUsage
 
 DEFAULT_MODEL = "llama3.2:3b"
 
@@ -23,7 +23,7 @@ class BaselineLLM(LLMClient):
         self.temperature = temperature
         self.top_p = top_p
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str) -> tuple[str, LLMUsage]:
         """Generate completion via Ollama chat API."""
         try:
             import ollama
@@ -41,4 +41,21 @@ class BaselineLLM(LLMClient):
                 "num_predict": 2048,
             },
         )
-        return response.message.content or ""
+
+        content = response.message.content or ""
+
+        # Ollama returns token usage differently depending on client version
+        if isinstance(response, dict):
+            prompt_tokens = response.get("prompt_eval_count", 0) or 0
+            completion_tokens = response.get("eval_count", 0) or 0
+        else:
+            prompt_tokens = getattr(response, "prompt_eval_count", None) or 0
+            completion_tokens = getattr(response, "eval_count", None) or 0
+
+        usage = LLMUsage(
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=prompt_tokens + completion_tokens,
+        )
+
+        return content, usage

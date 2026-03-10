@@ -1,41 +1,9 @@
-"""Retrieval evaluation metrics: Precision@K and Recall@K."""
+"""Retrieval evaluation metrics: Precision@K and Recall@K (page-based relevance)."""
 
 from pathlib import Path
 from typing import Any, Callable
 
-from .retrieval_dataset import load_retrieval_dataset
-
-
-def evaluate_queries(
-    queries: list[dict[str, Any]],
-    retriever_fn: Callable[[str], list],
-    k: int = 5,
-) -> tuple[list[float], list[float]]:
-    """
-    Evaluate retriever on a list of query dicts.
-
-    Each query must have "query" and "relevant_chunks" keys.
-    Skips queries with empty relevant_chunks.
-    Returns (precisions, recalls) per query.
-    """
-    precisions: list[float] = []
-    recalls: list[float] = []
-
-    for q in queries:
-        relevant = set(q.get("relevant_chunks", []))
-        if not relevant:
-            continue
-
-        results = retriever_fn(q["query"])
-        retrieved_ids = [
-            r.chunk_id if hasattr(r, "chunk_id") else r.get("chunk_id", "")
-            for r in results
-        ]
-
-        precisions.append(precision_at_k(retrieved_ids, relevant, k))
-        recalls.append(recall_at_k(retrieved_ids, relevant, k))
-
-    return precisions, recalls
+from .dataset_loader import get_expected_pages, load_evaluation_dataset
 
 
 def precision_at_k(
@@ -72,18 +40,65 @@ def recall_at_k(
     return hits / len(relevant_ids)
 
 
-def evaluate_retrieval(
+def precision_at_k_by_pages(
+    retrieved_pages: list[int],
+    expected_pages: set[int],
+    k: int,
+) -> float:
+    """
+    Precision@K using page-based relevance.
+
+    Chunk is relevant if chunk.page_number in expected_pages.
+    """
+    if k <= 0:
+        return 0.0
+    top_k = retrieved_pages[:k]
+    hits = sum(1 for p in top_k if p in expected_pages)
+    return hits / k
+
+
+def recall_at_k_by_pages(
+    retrieved_pages: list[int],
+    expected_pages: set[int],
+    k: int,
+) -> float:
+    """
+    Recall@K using page-based relevance.
+    """
+    if not expected_pages:
+        return 0.0
+    top_k = retrieved_pages[:k]
+    hits = sum(1 for p in top_k if p in expected_pages)
+    return hits / len(expected_pages)
+
+
+def evaluate_retrieval_by_pages(
     dataset_path: Path,
     retriever_fn: Callable[[str], list],
     k: int = 5,
 ) -> dict[str, float]:
     """
-    Evaluate retriever against dataset file.
+    Evaluate retriever against unified dataset using page-based relevance.
 
-    Loads dataset, calls evaluate_queries, returns aggregated metrics.
+    retriever_fn(query) returns list of objects with .page_number and .document_id.
     """
-    data = load_retrieval_dataset(dataset_path)
-    precisions, recalls = evaluate_queries(data["queries"], retriever_fn, k)
+    data = load_evaluation_dataset(dataset_path)
+    precisions: list[float] = []
+    recalls: list[float] = []
+
+    for q in data["queries"]:
+        expected_pages = get_expected_pages(q)
+        if not expected_pages:
+            continue
+
+        results = retriever_fn(q["query"])
+        retrieved_pages = [
+            r.page_number if hasattr(r, "page_number") else r.get("page_number", 0)
+            for r in results
+        ]
+
+        precisions.append(precision_at_k_by_pages(retrieved_pages, expected_pages, k))
+        recalls.append(recall_at_k_by_pages(retrieved_pages, expected_pages, k))
 
     n = len(precisions)
     if n == 0:
@@ -94,3 +109,14 @@ def evaluate_retrieval(
         f"recall@{k}": round(sum(recalls) / n, 4),
         "n_queries": n,
     }
+
+
+def evaluate_retrieval(
+    dataset_path: Path,
+    retriever_fn: Callable[[str], list],
+    k: int = 5,
+) -> dict[str, float]:
+    """
+    Evaluate retriever. Uses page-based relevance for unified dataset.
+    """
+    return evaluate_retrieval_by_pages(dataset_path, retriever_fn, k)

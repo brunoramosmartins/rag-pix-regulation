@@ -1,6 +1,16 @@
 """Abstract LLM client interface for RAG pipeline."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+
+@dataclass
+class LLMUsage:
+    """Token usage for cost estimation and observability."""
+
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
 
 
 class LLMClient(ABC):
@@ -12,7 +22,7 @@ class LLMClient(ABC):
     """
 
     @abstractmethod
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str) -> tuple[str, LLMUsage]:
         """
         Generate a completion for the given prompt.
 
@@ -23,7 +33,7 @@ class LLMClient(ABC):
 
         Returns
         -------
-        str
-            Model-generated answer.
+        tuple[str, LLMUsage]
+            Model-generated answer and token usage metadata.
         """
         ...
