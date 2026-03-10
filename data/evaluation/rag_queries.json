@@ -1,0 +1,29 @@
+{
+  "queries": [
+    {
+      "query_id": "rq1",
+      "query": "Como funciona o cadastro de chave Pix?",
+      "expected_documents": ["manual_dict"]
+    },
+    {
+      "query_id": "rq2",
+      "query": "Regras para devolução por fraude",
+      "expected_documents": ["manual_dict"]
+    },
+    {
+      "query_id": "rq3",
+      "query": "Processo de portabilidade de chave Pix",
+      "expected_documents": ["manual_dict"]
+    },
+    {
+      "query_id": "rq4",
+      "query": "Quais são os limites de transação do Pix?",
+      "expected_documents": ["manual_dict"]
+    },
+    {
+      "query_id": "rq5",
+      "query": "Como solicitar estorno de transação Pix?",
+      "expected_documents": ["manual_dict"]
+    }
+  ]
+}

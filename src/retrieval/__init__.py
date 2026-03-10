@@ -1,8 +1,6 @@
 """Retrieval module - Similarity search and document retrieval."""
 
-from .query_embedding import embed_query
-from .retriever import RetrievalResult, retrieve
-from .vector_search import vector_search
+from .models import RetrievalResult
 
 __all__ = [
     "embed_query",
@@ -10,3 +8,17 @@ __all__ = [
     "retrieve",
     "RetrievalResult",
 ]
+
+
+def __getattr__(name: str):
+    """Lazy import for heavy modules (embed_query, retrieve, vector_search)."""
+    if name == "embed_query":
+        from .query_embedding import embed_query
+        return embed_query
+    if name == "retrieve":
+        from .retriever import retrieve
+        return retrieve
+    if name == "vector_search":
+        from .vector_search import vector_search
+        return vector_search
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

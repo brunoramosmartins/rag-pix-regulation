@@ -1,22 +1,8 @@
 """Retriever orchestration: query embedding + vector search."""
 
-from dataclasses import dataclass
-
+from .models import RetrievalResult
 from .query_embedding import embed_query
 from .vector_search import vector_search
-
-
-@dataclass
-class RetrievalResult:
-    """Single retrieval result with metadata."""
-
-    text: str
-    chunk_id: str
-    document_id: str
-    page_number: int
-    section_title: str | None
-    similarity_score: float | None
-    source_file: str | None = None
 
 
 def retrieve(
