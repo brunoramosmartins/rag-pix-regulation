@@ -22,7 +22,9 @@ from src.chunking import segment_records, chunk_records  # noqa: E402
 def main() -> None:
     corpus_path = PROJECT_ROOT / "data" / "processed" / "corpus_pages.jsonl"
     if not corpus_path.exists():
-        print("ERROR: corpus_pages.jsonl not found. Run: python scripts/run_ingestion.py")
+        print(
+            "ERROR: corpus_pages.jsonl not found. Run: python scripts/run_ingestion.py"
+        )
         sys.exit(1)
 
     records = []
@@ -34,7 +36,9 @@ def main() -> None:
     segments = segment_records(records[:3])
     chunks = chunk_records(segments, chunk_size=500, chunk_overlap=50)
 
-    print(f"Pages: {len(records[:3])} -> Segments: {len(segments)} -> Chunks: {len(chunks)}\n")
+    print(
+        f"Pages: {len(records[:3])} -> Segments: {len(segments)} -> Chunks: {len(chunks)}\n"
+    )
 
     for i, chunk in enumerate(chunks[:8]):
         print(f"--- Chunk {i} ---")

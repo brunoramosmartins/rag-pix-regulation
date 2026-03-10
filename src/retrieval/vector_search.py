@@ -34,17 +34,23 @@ def vector_search(
     for obj in response.objects:
         props = obj.properties
         # Weaviate returns distance (cosine: 0=identical). Convert to similarity (0-1).
-        distance = getattr(obj.metadata, "distance", None) if hasattr(obj, "metadata") else None
+        distance = (
+            getattr(obj.metadata, "distance", None)
+            if hasattr(obj, "metadata")
+            else None
+        )
         similarity = round(1 - float(distance), 4) if distance is not None else None
 
-        results.append({
-            "chunk_id": props.get("chunk_id"),
-            "document_id": props.get("document_id"),
-            "page_number": props.get("page_number"),
-            "section_title": props.get("section_title"),
-            "text": props.get("text"),
-            "source_file": props.get("source_file"),
-            "similarity_score": similarity,
-        })
+        results.append(
+            {
+                "chunk_id": props.get("chunk_id"),
+                "document_id": props.get("document_id"),
+                "page_number": props.get("page_number"),
+                "section_title": props.get("section_title"),
+                "text": props.get("text"),
+                "source_file": props.get("source_file"),
+                "similarity_score": similarity,
+            }
+        )
 
     return results

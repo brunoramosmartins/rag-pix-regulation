@@ -43,11 +43,15 @@ def main() -> None:
 
     logger.info("Retrieval evaluation (k=%d)", DEFAULT_K)
     logger.info("Queries evaluated: %d", metrics.get("n_queries", 0))
-    logger.info("Precision@%d = %.4f", DEFAULT_K, metrics.get(f"precision@{DEFAULT_K}", 0))
+    logger.info(
+        "Precision@%d = %.4f", DEFAULT_K, metrics.get(f"precision@{DEFAULT_K}", 0)
+    )
     logger.info("Recall@%d = %.4f", DEFAULT_K, metrics.get(f"recall@{DEFAULT_K}", 0))
 
     if metrics.get("n_queries", 0) == 0:
-        logger.warning("No queries with ground truth. Add expected_pages to %s", DATASET_PATH)
+        logger.warning(
+            "No queries with ground truth. Add expected_pages to %s", DATASET_PATH
+        )
 
 
 if __name__ == "__main__":

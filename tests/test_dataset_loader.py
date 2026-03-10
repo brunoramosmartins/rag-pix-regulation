@@ -3,8 +3,6 @@
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from src.evaluation.dataset_loader import (
     get_expected_documents,
     get_expected_pages,
@@ -15,11 +13,11 @@ from src.evaluation.dataset_loader import (
 def test_load_evaluation_dataset() -> None:
     """Load valid dataset."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        f.write('''{
+        f.write("""{
             "queries": [
                 {"query_id": "q1", "query": "test?", "expected_pages": [1, 2]}
             ]
-        }''')
+        }""")
         path = Path(f.name)
 
     try:

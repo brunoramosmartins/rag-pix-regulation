@@ -1,7 +1,7 @@
 """RAG evaluation: groundedness, citation coverage, hallucination detection."""
 
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
 
 @dataclass
@@ -30,7 +30,9 @@ def compute_citation_coverage(
     if not citations:
         return 1.0
     valid_refs = {
-        (r.document_id, r.page_number) if hasattr(r, "document_id") else (r.get("document_id", ""), r.get("page_number", 0))
+        (r.document_id, r.page_number)
+        if hasattr(r, "document_id")
+        else (r.get("document_id", ""), r.get("page_number", 0))
         for r in retrieved_chunks
     }
     covered = 0
@@ -61,7 +63,6 @@ def detect_hallucination(
     Returns True if hallucination detected.
     """
     answer_lower = answer.lower()
-    context_lower = context.lower()
 
     # Good: explicitly says info not available
     no_info_phrases = [
@@ -119,7 +120,9 @@ def evaluate_rag_response(
     citation_cov = compute_citation_coverage(citations, retrieved_chunks)
     hallucination = detect_hallucination(answer, context, "")
     context_used = check_context_usage(answer, context)
-    groundedness = citation_cov * (1.0 if context_used else 0.5) * (0.0 if hallucination else 1.0)
+    groundedness = (
+        citation_cov * (1.0 if context_used else 0.5) * (0.0 if hallucination else 1.0)
+    )
 
     return RAGEvaluationResult(
         query_id=query_id,

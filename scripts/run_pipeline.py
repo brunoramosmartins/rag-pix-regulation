@@ -42,7 +42,9 @@ def main() -> None:
             cwd=str(PROJECT_ROOT),
         )
         if result.returncode != 0:
-            logger.error("Pipeline failed at %s (exit code %d)", script, result.returncode)
+            logger.error(
+                "Pipeline failed at %s (exit code %d)", script, result.returncode
+            )
             raise SystemExit(result.returncode)
 
     logger.info("Pipeline completed successfully")

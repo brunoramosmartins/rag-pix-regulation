@@ -1,3 +1,10 @@
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+exclude = ["RAG_DeepLearningAI"]
+
+[tool.ruff.lint.per-file-ignores]
+# Path setup required before src imports
+"app/streamlit_app.py" = ["E402"]
+"scripts/evaluate_rag.py" = ["E402"]
+"scripts/evaluate_retrieval.py" = ["E402"]

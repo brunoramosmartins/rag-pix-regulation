@@ -6,9 +6,16 @@ import re
 _SECTION_PATTERN = re.compile(r"^\d+(?:\.\d+)*\s+.+$")
 
 # Flow table columns in DICT manual - reject lines with 2+ of these
-_FLOW_KEYWORDS = frozenset({
-    "camada", "tipo", "descrição", "ação", "mensagem", "comunicação",
-})
+_FLOW_KEYWORDS = frozenset(
+    {
+        "camada",
+        "tipo",
+        "descrição",
+        "ação",
+        "mensagem",
+        "comunicação",
+    }
+)
 
 # Articles: Art. 1º, Art. 2º
 _ARTICLE_PATTERN = re.compile(r"Art\.\s*\d+º?", re.IGNORECASE)

@@ -23,17 +23,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Register Phoenix tracer BEFORE any RAG/pipeline imports (sends traces to Phoenix)
 try:
     from phoenix.otel import register
+
     register(project_name="rag-pix-regulation", auto_instrument=False)
 except ImportError:
     pass  # Phoenix optional; evaluation runs without traces
 
-from src.evaluation.evaluation_runner import (
-    export_report,
-    run_full_evaluation,
-    run_retrieval_evaluation,
-)
+from src.evaluation.evaluation_runner import export_report, run_full_evaluation
 from src.retrieval import retrieve
-from src.utils.system_checks import check_evaluation_dependencies, check_rag_dependencies
+from src.utils.system_checks import (
+    check_evaluation_dependencies,
+    check_rag_dependencies,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -71,17 +71,25 @@ def main() -> None:
 
             rag_fn = _rag_fn
         except ImportError as e:
-            logger.warning("RAG not available, running retrieval-only evaluation: %s", e)
+            logger.warning(
+                "RAG not available, running retrieval-only evaluation: %s", e
+            )
 
     results = run_full_evaluation(DATASET_PATH, retriever_fn, rag_fn, k=K)
 
-    logger.info("Retrieval: Precision@%d = %.4f, Recall@%d = %.4f",
-                K, results["retrieval"].get(f"precision@{K}", 0),
-                K, results["retrieval"].get(f"recall@{K}", 0))
+    logger.info(
+        "Retrieval: Precision@%d = %.4f, Recall@%d = %.4f",
+        K,
+        results["retrieval"].get(f"precision@{K}", 0),
+        K,
+        results["retrieval"].get(f"recall@{K}", 0),
+    )
     if results.get("rag"):
-        logger.info("RAG: citation_coverage = %.4f, hallucination_rate = %.4f",
-                    results["rag"]["citation_coverage"],
-                    results["rag"]["hallucination_rate"])
+        logger.info(
+            "RAG: citation_coverage = %.4f, hallucination_rate = %.4f",
+            results["rag"]["citation_coverage"],
+            results["rag"]["hallucination_rate"],
+        )
 
     report_path = REPORTS_DIR / "evaluation_report.json"
     export_report(results, report_path)

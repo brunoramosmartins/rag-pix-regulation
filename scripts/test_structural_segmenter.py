@@ -20,7 +20,9 @@ from src.chunking import segment_records  # noqa: E402
 def main() -> None:
     corpus_path = PROJECT_ROOT / "data" / "processed" / "corpus_pages.jsonl"
     if not corpus_path.exists():
-        print("ERROR: corpus_pages.jsonl not found. Run: python scripts/run_ingestion.py")
+        print(
+            "ERROR: corpus_pages.jsonl not found. Run: python scripts/run_ingestion.py"
+        )
         sys.exit(1)
 
     records = []
@@ -37,7 +39,9 @@ def main() -> None:
     print(f"Sample: {len(sample)} pages -> {len(segments)} segments\n")
 
     for i, seg in enumerate(segments[:10]):
-        print(f"--- Segment {i} (page {seg['page_number']}, idx {seg['segment_index']}) ---")
+        print(
+            f"--- Segment {i} (page {seg['page_number']}, idx {seg['segment_index']}) ---"
+        )
         print(f"section_title: {seg.get('section_title')}")
         print(f"article_numbers: {seg.get('article_numbers')}")
         print(f"text (first 200 chars): {seg['text'][:200]}...")

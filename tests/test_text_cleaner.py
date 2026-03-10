@@ -100,7 +100,10 @@ def test_preserve_legal_markers_paragraph() -> None:
     text = "Conforme acima. §1º O usuário deve validar."
     result = preserve_legal_markers(text)
     assert "§1º" in result
-    assert result.index("§1º") == 0 or result[result.index("§1º") - 2 : result.index("§1º")] == "\n\n"
+    assert (
+        result.index("§1º") == 0
+        or result[result.index("§1º") - 2 : result.index("§1º")] == "\n\n"
+    )
 
 
 def test_preserve_legal_markers_survives_pipeline() -> None:

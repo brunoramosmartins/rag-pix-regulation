@@ -33,7 +33,11 @@ def main() -> None:
         print(f"\n--- Query: {query} ---\n")
         results = retrieve(query, top_k=3)
         for i, r in enumerate(results, 1):
-            score_str = f" (similarity: {r.similarity_score})" if r.similarity_score is not None else ""
+            score_str = (
+                f" (similarity: {r.similarity_score})"
+                if r.similarity_score is not None
+                else ""
+            )
             print(f"--- Result {i}{score_str} ---")
             print(f"document_id: {r.document_id}")
             print(f"page_number: {r.page_number}")

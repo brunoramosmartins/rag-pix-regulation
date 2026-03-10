@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .dataset_loader import get_expected_pages, load_evaluation_dataset
-from .rag_evaluation import RAGEvaluationResult, evaluate_rag_response
+from .rag_evaluation import evaluate_rag_response
 from .retrieval_metrics import (
     evaluate_retrieval_by_pages,
     precision_at_k_by_pages,
@@ -70,12 +70,31 @@ def run_full_evaluation(
             logger.warning("RAG failed for query %s: %s", q.get("query_id"), e)
             continue
 
-        answer = response.answer if hasattr(response, "answer") else response.get("answer", "")
-        context = response.context if hasattr(response, "context") else response.get("context", "")
-        citations = response.citations if hasattr(response, "citations") else response.get("citations", [])
-        chunks = response.retrieved_chunks if hasattr(response, "retrieved_chunks") else response.get("retrieved_chunks", [])
+        answer = (
+            response.answer
+            if hasattr(response, "answer")
+            else response.get("answer", "")
+        )
+        context = (
+            response.context
+            if hasattr(response, "context")
+            else response.get("context", "")
+        )
+        citations = (
+            response.citations
+            if hasattr(response, "citations")
+            else response.get("citations", [])
+        )
+        chunks = (
+            response.retrieved_chunks
+            if hasattr(response, "retrieved_chunks")
+            else response.get("retrieved_chunks", [])
+        )
 
-        retrieved_pages = [c.page_number if hasattr(c, "page_number") else c.get("page_number", 0) for c in chunks]
+        retrieved_pages = [
+            c.page_number if hasattr(c, "page_number") else c.get("page_number", 0)
+            for c in chunks
+        ]
         prec = precision_at_k_by_pages(retrieved_pages, expected_pages, k)
         rec = recall_at_k_by_pages(retrieved_pages, expected_pages, k)
 
@@ -90,14 +109,16 @@ def run_full_evaluation(
             recall_at_k=rec,
         )
 
-        per_query.append({
-            "query_id": result.query_id,
-            "precision_at_k": result.precision_at_k,
-            "recall_at_k": result.recall_at_k,
-            "citation_coverage": result.citation_coverage,
-            "groundedness_score": result.groundedness_score,
-            "hallucination_detected": result.hallucination_detected,
-        })
+        per_query.append(
+            {
+                "query_id": result.query_id,
+                "precision_at_k": result.precision_at_k,
+                "recall_at_k": result.recall_at_k,
+                "citation_coverage": result.citation_coverage,
+                "groundedness_score": result.groundedness_score,
+                "hallucination_detected": result.hallucination_detected,
+            }
+        )
         citation_coverages.append(result.citation_coverage)
         groundedness_scores.append(result.groundedness_score)
         if result.hallucination_detected:
@@ -107,9 +128,15 @@ def run_full_evaluation(
     return {
         "retrieval": retrieval_metrics,
         "rag": {
-            "citation_coverage": round(sum(citation_coverages) / n_rag, 4) if n_rag else 0.0,
-            "groundedness_avg": round(sum(groundedness_scores) / n_rag, 4) if n_rag else 0.0,
-            "hallucination_rate": round(hallucination_count / n_rag, 4) if n_rag else 0.0,
+            "citation_coverage": round(sum(citation_coverages) / n_rag, 4)
+            if n_rag
+            else 0.0,
+            "groundedness_avg": round(sum(groundedness_scores) / n_rag, 4)
+            if n_rag
+            else 0.0,
+            "hallucination_rate": round(hallucination_count / n_rag, 4)
+            if n_rag
+            else 0.0,
             "n_queries": n_rag,
         },
         "per_query": per_query,

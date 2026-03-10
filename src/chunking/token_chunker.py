@@ -144,9 +144,7 @@ def chunk_segments(
     """Chunk multiple segments."""
     chunks: list[Chunk] = []
     for segment in segments:
-        chunks.extend(
-            chunk_segment(segment, chunk_size, chunk_overlap, tokenizer_name)
-        )
+        chunks.extend(chunk_segment(segment, chunk_size, chunk_overlap, tokenizer_name))
     return chunks
 
 

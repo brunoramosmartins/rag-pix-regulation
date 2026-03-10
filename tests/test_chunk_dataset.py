@@ -76,6 +76,7 @@ def test_save_chunks_jsonl_creates_file() -> None:
 
 def test_save_chunks_jsonl_streaming() -> None:
     """save_chunks_jsonl supports iterable (streaming) input."""
+
     def chunk_gen():
         yield _make_chunk()
         yield Chunk(

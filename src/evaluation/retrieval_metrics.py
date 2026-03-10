@@ -1,7 +1,7 @@
 """Retrieval evaluation metrics: Precision@K and Recall@K (page-based relevance)."""
 
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 from .dataset_loader import get_expected_pages, load_evaluation_dataset
 

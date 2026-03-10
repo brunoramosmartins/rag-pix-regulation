@@ -7,7 +7,9 @@ from unittest.mock import MagicMock
 import pytest
 
 # Import prompt_template directly to avoid pulling in rag_pipeline (sentence_transformers)
-_prompt_path = Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py"
+_prompt_path = (
+    Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py"
+)
 _spec = importlib.util.spec_from_file_location("prompt_template", _prompt_path)
 _prompt_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_prompt_mod)
