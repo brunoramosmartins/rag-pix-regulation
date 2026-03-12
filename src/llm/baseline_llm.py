@@ -38,7 +38,8 @@ class BaselineLLM(LLMClient):
             options={
                 "temperature": self.temperature,
                 "top_p": self.top_p,
-                "num_predict": 2048,
+                "num_predict": 512,   # max response tokens — enough for regulatory answers
+                "num_ctx": 2048,      # KV cache window — keeps prefill fast on CPU/GPU
             },
         )
 

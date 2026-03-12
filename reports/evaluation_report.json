@@ -1,0 +1,95 @@
+{
+  "retrieval": {
+    "precision@5": 0.34,
+    "recall@5": 1.5,
+    "n_queries": 10
+  },
+  "rag": {
+    "citation_coverage": 1.0,
+    "groundedness_avg": 1.0,
+    "hallucination_rate": 0.0,
+    "n_queries": 10
+  },
+  "per_query": [
+    {
+      "query_id": "eq1",
+      "precision_at_k": 0.4,
+      "recall_at_k": 2.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq2",
+      "precision_at_k": 0.8,
+      "recall_at_k": 2.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq3",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq4",
+      "precision_at_k": 0.4,
+      "recall_at_k": 2.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq5",
+      "precision_at_k": 0.4,
+      "recall_at_k": 2.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq6",
+      "precision_at_k": 0.8,
+      "recall_at_k": 4.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq7",
+      "precision_at_k": 0.6,
+      "recall_at_k": 3.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq8",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq9",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    },
+    {
+      "query_id": "eq10",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "citation_coverage": 1.0,
+      "groundedness_score": 1.0,
+      "hallucination_detected": false
+    }
+  ]
+}
