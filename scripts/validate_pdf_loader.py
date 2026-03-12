@@ -6,7 +6,7 @@ Example
 -------
 Run from the project root:
 
-    python scripts/test_pdf_loader.py
+    python scripts/validate_pdf_loader.py
 """
 
 from pathlib import Path

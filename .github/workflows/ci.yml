@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Run ruff
+        run: ruff check .
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install lightweight dependencies
+        run: |
+          pip install pydantic pymupdf pytest transformers
+
+      - name: Run unit tests (no model/Weaviate required)
+        run: |
+          pytest tests/test_text_cleaner.py \
+                 tests/test_metadata_extractor.py \
+                 tests/test_serializer.py \
+                 tests/test_structural_segmenter.py \
+                 tests/test_retrieval_metrics.py \
+                 tests/test_rag_evaluation.py \
+                 tests/test_dataset_loader.py \
+                 tests/test_prompt_template.py \
+                 -v

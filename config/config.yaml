@@ -1,0 +1,34 @@
+# RAG Pix Regulation — Default Configuration
+# Override individual values via environment variables (see .env.example).
+
+embeddings:
+  model: "BAAI/bge-m3"
+  batch_size: 32
+  dimensions: 1024
+
+chunking:
+  chunk_size: 500        # tokens per chunk
+  chunk_overlap: 50      # overlapping tokens between consecutive chunks
+
+retrieval:
+  top_k: 5              # number of chunks to retrieve per query
+  collection: "PixRegulationChunks"
+
+llm:
+  model: "llama3.2:3b"
+  temperature: 0
+  top_p: 1.0
+
+rag:
+  max_context_tokens: 4096
+
+weaviate:
+  host: "localhost"
+  port: 8080
+
+ollama:
+  host: "http://localhost:11434"
+
+phoenix:
+  host: "localhost"
+  port: 6006

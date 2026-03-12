@@ -40,6 +40,23 @@ The project is successful when:
 
 ---
 
+## Project Status
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **1. Setup** | Repo, venv, dependencies | ✅ Complete |
+| **2. Ingestion** | PDF parsing, text extraction, metadata | ✅ Complete |
+| **3. Chunking** | Structural + token-based chunking | ✅ Complete |
+| **4. Embeddings** | BGE-M3 vectors, Weaviate indexing | ✅ Complete |
+| **5. Retrieval** | Semantic search, Recall@K, Precision@K | ✅ Complete |
+| **6. RAG Pipeline** | Prompt template, answer generation, citations | ✅ Complete |
+| **7. Evaluation & Observability** | Metrics, Phoenix tracing, evaluation runner | ✅ Complete |
+| **8. Demo & Publication** | Streamlit app, documentation | 🔄 In Progress |
+
+> **Note:** The full pipeline (phases 1–7) is functional. The Streamlit demo (`app/`) is under active development.
+
+---
+
 ## System Architecture
 
 ```
@@ -126,7 +143,7 @@ rag-pix-regulation/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/<your-username>/rag-pix-regulation.git
+   git clone https://github.com/brunoramosmartins/rag-pix-regulation.git
    cd rag-pix-regulation
    ```
 
@@ -260,7 +277,17 @@ python scripts/evaluate_rag.py
 
 ### Configuration
 
-Place configuration files in `config/`. Parameters such as `embedding_model`, `chunk_size`, `chunk_overlap`, `top_k`, and `llm_model` should be externalized (e.g., `config.yaml`) rather than hardcoded.
+Default parameters are defined in [`config/config.yaml`](config/config.yaml). Copy `.env.example` to `.env` for environment-specific overrides.
+
+Key parameters:
+
+| Parameter | Default | File |
+|-----------|---------|------|
+| `embedding_model` | `BAAI/bge-m3` | `config/config.yaml` |
+| `chunk_size` | `500` | `config/config.yaml` |
+| `chunk_overlap` | `50` | `config/config.yaml` |
+| `top_k` | `5` | `config/config.yaml` |
+| `llm_model` | `llama3.2:3b` | `config/config.yaml` |
 
 ---
 

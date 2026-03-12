@@ -5,8 +5,8 @@ Validate token chunking on real corpus.
 Run from project root:
 
     python scripts/run_ingestion.py
-    python scripts/test_structural_segmenter.py  # optional: segment first
-    python scripts/test_chunking.py
+    python scripts/validate_structural_segmenter.py  # optional: segment first
+    python scripts/validate_chunking.py
 """
 
 import json

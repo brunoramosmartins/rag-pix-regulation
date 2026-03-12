@@ -3,6 +3,7 @@
 import time
 from typing import Any
 
+from src.utils.document_aliases import get_document_alias
 from src.utils.system_checks import check_rag_dependencies
 
 
@@ -75,6 +76,7 @@ def run_rag_query(query: str, top_k: int = 5) -> dict[str, Any]:
     chunks = [
         {
             "document_id": c.document_id,
+            "document_alias": get_document_alias(c.document_id),
             "page": c.page_number,
             "section": c.section_title or "—",
             "text": c.text[:500] + ("..." if len(c.text) > 500 else ""),

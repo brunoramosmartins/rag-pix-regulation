@@ -38,6 +38,10 @@ def generate_embeddings(
     model = get_embedding_model(model_name)
     texts = [c.text for c in chunks]
 
+    # NOTE: normalize_embeddings=False here is intentional.
+    # Weaviate uses cosine distance natively and handles un-normalized vectors correctly.
+    # Query embeddings in query_embedding.py use normalize=True for direct dot-product
+    # similarity, but cosine distance is invariant to L2 norm, so results are equivalent.
     embeddings = model.encode(
         texts,
         batch_size=batch_size,

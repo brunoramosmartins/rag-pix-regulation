@@ -1,5 +1,7 @@
 """Unit tests for token-based chunking."""
 
+import pytest
+
 from src.chunking import chunk_segment, chunk_segments, chunk_records
 from src.chunking.models import StructuralSegment
 from src.chunking.token_chunker import (
@@ -60,11 +62,8 @@ def test_chunk_overlap_validation() -> None:
         source_file="doc.pdf",
         text="Some text.",
     )
-    try:
+    with pytest.raises(ValueError, match="overlap"):
         chunk_segment(segment, chunk_size=100, chunk_overlap=100)
-        assert False, "Expected ValueError"
-    except ValueError as e:
-        assert "overlap" in str(e).lower()
 
 
 def test_chunk_metadata_preserved() -> None:

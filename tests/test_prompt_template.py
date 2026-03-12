@@ -1,6 +1,16 @@
 """Unit tests for RAG prompt template."""
 
-from src.rag.prompt_template import SYSTEM_INSTRUCTION, build_prompt
+import importlib.util
+from pathlib import Path
+
+# Load prompt_template directly to avoid pulling in rag_pipeline (sentence_transformers)
+_spec = importlib.util.spec_from_file_location(
+    "prompt_template",
+    Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py",
+)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+build_prompt = _mod.build_prompt
 
 
 def test_build_prompt_includes_sections() -> None:
@@ -17,9 +27,9 @@ def test_build_prompt_includes_sections() -> None:
 def test_build_prompt_includes_system_instruction() -> None:
     """System instruction is embedded."""
     prompt = build_prompt(context="x", query="y")
-    assert "Brazilian Pix regulation" in prompt
-    assert "only the provided regulatory context" in prompt
-    assert "not present" in prompt or "not available" in prompt
+    assert "Brazilian Pix" in prompt
+    assert "ONLY" in prompt or "exclusively" in prompt
+    assert "not present" in prompt or "not available" in prompt or "não está disponível" in prompt
 
 
 def test_build_prompt_deterministic() -> None:

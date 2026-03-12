@@ -4,7 +4,7 @@ Validate structural segmentation on real corpus.
 
 Run from project root:
 
-    python scripts/test_structural_segmenter.py
+    python scripts/validate_structural_segmenter.py
 """
 
 import json

@@ -1,0 +1,17 @@
+# Document display aliases
+# Maps document_id (filename stem, lowercase) → human-readable name shown in citations and UI.
+# document_id is generated from the PDF filename: stem.lower().replace(" ", "_")
+
+# ── Current names (post-rename) ───────────────────────────────────────────────
+manual_operacional_dict: "Manual Operacional do DICT (MED 2.0)"
+manual_tempos_pix: "Manual de Tempos do Pix v7.0"
+manual_interfaces_comunicacao: "Manual das Interfaces de Comunicação v1.12"
+manual_resolucao_disputas: "Manual de Resolução de Disputas v5.0"
+manual_fluxos_pix: "Manual de Fluxos do Pix v2.1"
+manual_iniciacao_pix: "Manual de Padrões para Iniciação do Pix v2.9.0"
+manual_marca_pix: "Manual de Uso da Marca Pix v1.6"
+
+# ── Legacy names (pre-rename) — remove after full re-index ───────────────────
+x_manualoperacionaldodict: "Manual Operacional do DICT (MED 2.0)"
+ix_manualdtempsdopix: "Manual de Tempos do Pix v7.0"
+xi_manual_de_resolucao_de_disputa: "Manual de Resolução de Disputas v5.0"
