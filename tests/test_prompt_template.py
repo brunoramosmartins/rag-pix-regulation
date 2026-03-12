@@ -1,6 +1,6 @@
 """Unit tests for RAG prompt template."""
 
-from src.rag.prompt_template import SYSTEM_INSTRUCTION, build_prompt
+from src.rag.prompt_template import build_prompt
 
 
 def test_build_prompt_includes_sections() -> None:

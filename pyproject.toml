@@ -6,6 +6,9 @@ requires-python = ">=3.10"
 authors = [{ name = "Bruno Ramos Martins" }]
 readme = "README.md"
 license = { text = "MIT" }
+dependencies = [
+    "transformers>=4.30.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -25,3 +28,5 @@ exclude = ["RAG_DeepLearningAI"]
 "app/streamlit_app.py" = ["E402"]
 "scripts/evaluate_rag.py" = ["E402"]
 "scripts/evaluate_retrieval.py" = ["E402"]
+"scripts/demo_rag.py" = ["E402"]
+"scripts/compare_rag_vs_llm.py" = ["E402"]
