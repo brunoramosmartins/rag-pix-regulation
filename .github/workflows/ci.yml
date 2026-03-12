@@ -32,7 +32,7 @@ jobs:
 
       - name: Install lightweight dependencies
         run: |
-          pip install pydantic pymupdf pytest
+          pip install pydantic pymupdf pytest transformers
 
       - name: Run unit tests (no model/Weaviate required)
         run: |
