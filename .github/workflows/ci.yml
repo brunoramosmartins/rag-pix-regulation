@@ -43,5 +43,5 @@ jobs:
                  tests/test_retrieval_metrics.py \
                  tests/test_rag_evaluation.py \
                  tests/test_dataset_loader.py \
-                 tests/test_rag_pipeline.py \
+                 tests/test_prompt_template.py \
                  -v

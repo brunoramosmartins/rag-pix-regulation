@@ -1,6 +1,16 @@
 """Unit tests for RAG prompt template."""
 
-from src.rag.prompt_template import build_prompt
+import importlib.util
+from pathlib import Path
+
+# Load prompt_template directly to avoid pulling in rag_pipeline (sentence_transformers)
+_spec = importlib.util.spec_from_file_location(
+    "prompt_template",
+    Path(__file__).resolve().parent.parent / "src" / "rag" / "prompt_template.py",
+)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+build_prompt = _mod.build_prompt
 
 
 def test_build_prompt_includes_sections() -> None:
