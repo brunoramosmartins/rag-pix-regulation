@@ -76,7 +76,7 @@ def test_answer_query_returns_rag_response() -> None:
     assert "test answer" in response.answer
     assert response.context
     assert len(response.retrieved_chunks) == 1
-    assert response.citations == ["manual_dict p.5"]
+    assert response.citations == ["manual_dict, p. 5"]
 
 
 def test_answer_query_citations_deterministic() -> None:
@@ -90,8 +90,8 @@ def test_answer_query_citations_deterministic() -> None:
 
     response = answer_query("q", llm=MockLLM(), retriever=mock_retrieve)
 
-    assert "d1 p.1" in response.citations
-    assert "d1 p.2" in response.citations
+    assert "d1, p. 1" in response.citations
+    assert "d1, p. 2" in response.citations
 
 
 def test_answer_query_passes_top_k() -> None:

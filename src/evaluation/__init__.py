@@ -12,8 +12,11 @@ from .rag_evaluation import (
     evaluate_rag_response,
 )
 from .retrieval_metrics import (
+    average_precision_by_pages,
     evaluate_retrieval,
     evaluate_retrieval_by_pages,
+    ndcg_at_k_by_pages,
+    ndcg_at_k_graded,
     precision_at_k,
     precision_at_k_by_pages,
     recall_at_k,
@@ -29,6 +32,9 @@ __all__ = [
     "recall_at_k",
     "precision_at_k_by_pages",
     "recall_at_k_by_pages",
+    "ndcg_at_k_by_pages",
+    "ndcg_at_k_graded",
+    "average_precision_by_pages",
     "evaluate_retrieval",
     "evaluate_retrieval_by_pages",
     "RAGEvaluationResult",
