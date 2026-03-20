@@ -100,15 +100,11 @@ def trace_span(
     if openinference_span_kind and "openinference.span.kind" not in attrs:
         attrs["openinference.span.kind"] = openinference_span_kind.upper()
 
-    # Phoenix tracer accepts openinference_span_kind as kwarg for UI classification
-    kwargs: dict[str, Any] = {"attributes": attrs}
-    if openinference_span_kind:
-        kwargs["openinference_span_kind"] = openinference_span_kind.lower()
-
-    try:
-        span_ctx = tracer.start_as_current_span(name, **kwargs)
-    except TypeError:
-        span_ctx = tracer.start_as_current_span(name, attributes=attrs)
+    # Pass openinference_span_kind via attributes only.
+    # Passing it as a kwarg to start_as_current_span causes TypeError with
+    # NoOpTracer (and the error surfaces lazily when entering the context
+    # manager, making try/except unreliable).
+    span_ctx = tracer.start_as_current_span(name, attributes=attrs)
 
     with span_ctx as span:
         try:

@@ -35,9 +35,9 @@ def test_build_context_concatenates_chunks() -> None:
         _chunk("Second chunk.", doc="d1", page=2),
     ]
     ctx = build_context(chunks, max_chunks=5)
-    assert "[d1 p.1]" in ctx
+    assert "[d1, p. 1]" in ctx
     assert "First chunk." in ctx
-    assert "[d1 p.2]" in ctx
+    assert "[d1, p. 2]" in ctx
     assert "Second chunk." in ctx
 
 
