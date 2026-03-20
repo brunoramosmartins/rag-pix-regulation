@@ -68,6 +68,7 @@ def test_answer_query_returns_rag_response() -> None:
     response = answer_query(
         "Como cadastrar chave?",
         llm=MockLLM(),
+        max_context_tokens=1500,
         retriever=_mock_retrieve,
     )
 
@@ -88,7 +89,9 @@ def test_answer_query_citations_deterministic() -> None:
             _chunk("B", doc="d1", page=2),
         ]
 
-    response = answer_query("q", llm=MockLLM(), retriever=mock_retrieve)
+    response = answer_query(
+        "q", llm=MockLLM(), max_context_tokens=1500, retriever=mock_retrieve,
+    )
 
     assert "d1, p. 1" in response.citations
     assert "d1, p. 2" in response.citations
@@ -102,7 +105,9 @@ def test_answer_query_passes_top_k() -> None:
         calls.append((query, top_k))
         return []
 
-    answer_query("q", llm=MockLLM(), top_k=7, retriever=mock_retrieve)
+    answer_query(
+        "q", llm=MockLLM(), top_k=7, max_context_tokens=1500, retriever=mock_retrieve,
+    )
 
     assert calls == [("q", 7)]
 

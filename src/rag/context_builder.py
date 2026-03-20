@@ -1,55 +1,66 @@
-"""Context builder with token-based truncation."""
+"""Context builder with real-tokenizer-based greedy packing."""
 
 from typing import TYPE_CHECKING
 
 from src.utils.document_aliases import get_document_alias
+from src.utils.tokenizer import count_tokens
 
 if TYPE_CHECKING:
-    from src.retrieval.retriever import RetrievalResult
+    from src.retrieval.models import RetrievalResult
 
-CHARS_PER_TOKEN = 4
+SEPARATOR = "\n\n"
 
 
-def _count_tokens(text: str) -> int:
-    return len(text) // CHARS_PER_TOKEN
+def _format_chunk(chunk: "RetrievalResult") -> str:
+    """Format a single chunk with its source marker."""
+    alias = get_document_alias(chunk.document_id)
+    marker = f"[{alias}, p. {chunk.page_number}]"
+    return f"{marker}\n{chunk.text}"
 
 
 def build_context(
     chunks: list["RetrievalResult"],
-    max_chunks: int = 3,
+    max_chunks: int = 20,
     max_tokens: int | None = None,
 ) -> str:
     """
-    Build context string from retrieved chunks with truncation.
+    Build context string by greedily packing chunks into a token budget.
 
-    Markers use human-readable document aliases so the LLM cites correctly.
+    Chunks are added in order (highest similarity first) until the token
+    budget is exhausted. No chunk is truncated mid-text; either the whole
+    chunk fits or it is skipped.
+
+    Parameters
+    ----------
+    chunks : list[RetrievalResult]
+        Retrieved chunks, ordered by relevance (highest first).
+    max_chunks : int
+        Safety cap on number of chunks (default 20).
+    max_tokens : int | None
+        Token budget. When None, all chunks (up to max_chunks) are included.
     """
-    limited = chunks[:max_chunks]
-    parts: list[str] = []
-
-    for r in limited:
-        alias = get_document_alias(r.document_id)
-        marker = f"[{alias}, p. {r.page_number}]"
-        parts.append(f"{marker}\n{r.text}")
-
-    context = "\n\n".join(parts)
+    if not chunks:
+        return ""
 
     if max_tokens is None:
-        return context
+        limited = chunks[:max_chunks]
+        parts = [_format_chunk(c) for c in limited]
+        return SEPARATOR.join(parts)
 
-    if _count_tokens(context) <= max_tokens:
-        return context
+    parts: list[str] = []
+    total_tokens = 0
 
-    for i in range(len(limited) - 1, 0, -1):
-        truncated = "\n\n".join(parts[:i])
-        if _count_tokens(truncated) <= max_tokens:
-            return truncated
+    for chunk in chunks[:max_chunks]:
+        formatted = _format_chunk(chunk)
+        chunk_tokens = count_tokens(formatted)
 
-    if parts:
-        max_chars = max_tokens * CHARS_PER_TOKEN
-        prefix = "\n\n".join(parts[:-1])
-        sep = "\n\n" if prefix else ""
-        allowed = max_chars - len(prefix) - len(sep)
-        if allowed > 0:
-            parts[-1] = parts[-1][:allowed].rstrip() + "..."
-    return "\n\n".join(parts)
+        # Account for separator between chunks
+        sep_tokens = count_tokens(SEPARATOR) if parts else 0
+
+        if total_tokens + sep_tokens + chunk_tokens > max_tokens:
+            break
+
+        parts.append(formatted)
+        total_tokens += sep_tokens + chunk_tokens
+
+    return SEPARATOR.join(parts)
