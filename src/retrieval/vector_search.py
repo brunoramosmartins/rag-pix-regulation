@@ -9,6 +9,7 @@ from src.vectorstore.weaviate_client import CHUNK_COLLECTION, get_weaviate_clien
 def vector_search(
     query_vector: list[float],
     top_k: int = 5,
+    min_similarity: float = 0.0,
 ) -> list[dict[str, Any]]:
     """
     Execute vector similarity search in Weaviate.
@@ -52,5 +53,12 @@ def vector_search(
                 "similarity_score": similarity,
             }
         )
+
+    if min_similarity > 0.0:
+        results = [
+            r for r in results
+            if r["similarity_score"] is not None
+            and r["similarity_score"] >= min_similarity
+        ]
 
     return results

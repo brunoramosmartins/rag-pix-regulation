@@ -68,24 +68,48 @@ class RAGResponse:
     llm_usage: LLMUsage | None = None
 
 
+def _load_config() -> dict:
+    """Load full config from config.yaml. Returns empty dict on failure."""
+    try:
+        import yaml
+        from pathlib import Path
+
+        config_path = Path(__file__).resolve().parent.parent.parent / "config" / "config.yaml"
+        if config_path.exists():
+            with open(config_path) as f:
+                return yaml.safe_load(f) or {}
+    except Exception:
+        pass
+    return {}
+
+
 def _default_retrieve(query: str, top_k: int) -> list[RetrievalResult]:
-    return retrieve(query, top_k=top_k)
+    cfg = _load_config().get("retrieval", {})
+    min_similarity = cfg.get("min_similarity", 0.0)
+    return retrieve(query, top_k=top_k, min_similarity=min_similarity)
 
 
 def answer_query(
     query: str,
     llm: LLMClient,
     top_k: int = 5,
-    max_chunks: int = 3,
-    max_context_tokens: int | None = 1500,
+    max_chunks: int = 20,
+    max_context_tokens: int | None = None,
     retriever: Callable[[str, int], list[RetrievalResult]] | None = None,
 ) -> RAGResponse:
     """
     Answer a query using RAG: retrieve → build context → prompt → generate.
 
     Returns RAGResponse with answer including citation footer for verification.
+
+    When max_context_tokens is None, the value is loaded from config.yaml
+    (rag.max_context_tokens). Falls back to 2048 if config is unavailable.
     """
     retrieve_fn = retriever or _default_retrieve
+
+    if max_context_tokens is None:
+        cfg = _load_config().get("rag", {})
+        max_context_tokens = cfg.get("max_context_tokens", 2048)
 
     with trace_span("rag_pipeline", openinference_span_kind="chain") as parent_span:
         span_set_input(parent_span, query)

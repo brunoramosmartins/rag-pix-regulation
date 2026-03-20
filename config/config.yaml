@@ -11,8 +11,14 @@ chunking:
   chunk_overlap: 50      # overlapping tokens between consecutive chunks
 
 retrieval:
-  top_k: 5              # number of chunks to retrieve per query
+  top_k: 10             # over-retrieve for reranking (reranker trims to top_n)
   collection: "PixRegulationChunks"
+  min_similarity: 0.35  # minimum cosine similarity to include a chunk
+
+reranking:
+  enabled: true
+  model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  top_n: 5              # final number of chunks after reranking
 
 llm:
   model: "llama3.2:3b"
