@@ -8,7 +8,9 @@ from typing import Any, Callable
 from .dataset_loader import get_expected_pages, load_evaluation_dataset
 from .rag_evaluation import evaluate_rag_response
 from .retrieval_metrics import (
+    average_precision_by_pages,
     evaluate_retrieval_by_pages,
+    ndcg_at_k_by_pages,
     precision_at_k_by_pages,
     recall_at_k_by_pages,
 )
@@ -61,6 +63,9 @@ def run_full_evaluation(
 
     for q in data["queries"]:
         expected_pages = get_expected_pages(q)
+        difficulty = q.get("difficulty", "unknown")
+
+        # Skip negative queries (no expected pages) for retrieval metrics
         if not expected_pages:
             continue
 
@@ -97,6 +102,8 @@ def run_full_evaluation(
         ]
         prec = precision_at_k_by_pages(retrieved_pages, expected_pages, k)
         rec = recall_at_k_by_pages(retrieved_pages, expected_pages, k)
+        ndcg = ndcg_at_k_by_pages(retrieved_pages, expected_pages, k)
+        ap = average_precision_by_pages(retrieved_pages, expected_pages, k)
 
         result = evaluate_rag_response(
             query_id=q.get("query_id", ""),
@@ -112,8 +119,11 @@ def run_full_evaluation(
         per_query.append(
             {
                 "query_id": result.query_id,
+                "difficulty": difficulty,
                 "precision_at_k": result.precision_at_k,
                 "recall_at_k": result.recall_at_k,
+                "ndcg_at_k": ndcg,
+                "average_precision": ap,
                 "citation_coverage": result.citation_coverage,
                 "groundedness_score": result.groundedness_score,
                 "hallucination_detected": result.hallucination_detected,
@@ -125,6 +135,10 @@ def run_full_evaluation(
             hallucination_count += 1
 
     n_rag = len(per_query)
+
+    # Compute metrics by difficulty tier
+    by_difficulty = _aggregate_by_difficulty(per_query)
+
     return {
         "retrieval": retrieval_metrics,
         "rag": {
@@ -139,8 +153,33 @@ def run_full_evaluation(
             else 0.0,
             "n_queries": n_rag,
         },
+        "by_difficulty": by_difficulty,
         "per_query": per_query,
     }
+
+
+def _aggregate_by_difficulty(
+    per_query: list[dict[str, Any]],
+) -> dict[str, dict[str, float]]:
+    """Aggregate per-query metrics by difficulty tier."""
+    tiers: dict[str, list[dict[str, Any]]] = {}
+    for q in per_query:
+        tier = q.get("difficulty", "unknown")
+        tiers.setdefault(tier, []).append(q)
+
+    result: dict[str, dict[str, float]] = {}
+    for tier, queries in sorted(tiers.items()):
+        n = len(queries)
+        result[tier] = {
+            "n_queries": n,
+            "precision_at_k": round(sum(q["precision_at_k"] for q in queries) / n, 4),
+            "recall_at_k": round(sum(q["recall_at_k"] for q in queries) / n, 4),
+            "ndcg_at_k": round(sum(q["ndcg_at_k"] for q in queries) / n, 4),
+            "average_precision": round(
+                sum(q["average_precision"] for q in queries) / n, 4
+            ),
+        }
+    return result
 
 
 def export_report(results: dict[str, Any], output_path: Path) -> None:
