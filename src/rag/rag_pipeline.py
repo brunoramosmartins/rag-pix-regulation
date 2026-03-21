@@ -113,11 +113,28 @@ def answer_query(
 
     with trace_span("rag_pipeline", openinference_span_kind="chain") as parent_span:
         span_set_input(parent_span, query)
+        if parent_span and parent_span.is_recording():
+            parent_span.set_attribute("rag.top_k", top_k)
+            parent_span.set_attribute("rag.max_chunks", max_chunks)
+            parent_span.set_attribute("rag.max_context_tokens", max_context_tokens)
 
         with trace_span("retrieval", openinference_span_kind="retriever") as span:
             chunks = retrieve_fn(query, top_k)
             if span and span.is_recording():
                 span_set_input(span, query)
+                span.set_attribute("retrieval.top_k", top_k)
+                span.set_attribute("retrieval.result_count", len(chunks))
+                # Unique documents and pages for quick overview
+                unique_docs = {c.document_id for c in chunks if c.document_id}
+                unique_pages = {(c.document_id, c.page_number) for c in chunks}
+                span.set_attribute("retrieval.unique_documents", len(unique_docs))
+                span.set_attribute("retrieval.unique_pages", len(unique_pages))
+                if chunks:
+                    scores = [c.similarity_score for c in chunks if c.similarity_score is not None]
+                    if scores:
+                        span.set_attribute("retrieval.score.max", round(max(scores), 4))
+                        span.set_attribute("retrieval.score.min", round(min(scores), 4))
+                        span.set_attribute("retrieval.score.mean", round(sum(scores) / len(scores), 4))
                 for i, c in enumerate(chunks):
                     alias = get_document_alias(c.document_id)
                     span.set_attribute(f"retrieval.documents.{i}.document.id", c.chunk_id or c.document_id or str(i))
@@ -144,7 +161,9 @@ def answer_query(
                 chunks, max_chunks=max_chunks, max_tokens=max_context_tokens
             )
             if span and span.is_recording():
-                span_set_input(span, {"chunk_count": len(chunks)})
+                span_set_input(span, {"chunk_count": len(chunks), "max_tokens": max_context_tokens})
+                span.set_attribute("context.char_count", len(context))
+                span.set_attribute("context.chunk_count", len(chunks))
                 span_set_output(span, _truncate(context))
 
         with trace_span(
@@ -155,6 +174,7 @@ def answer_query(
                 span_set_input(
                     span, {"context_len": len(context), "query": query[:200]}
                 )
+                span.set_attribute("prompt.char_count", len(prompt))
                 span_set_output(span, _truncate(prompt))
 
         with trace_span("llm_generation", openinference_span_kind="llm") as span:
@@ -162,9 +182,16 @@ def answer_query(
                 model_name = getattr(llm, "model", "unknown")
                 span.set_attribute("llm.model_name", model_name)
                 span.set_attribute("llm.invocation_parameters", _truncate(prompt))
+                # Capture LLM config for debugging
+                for attr_name in ("temperature", "top_p", "num_ctx", "num_predict"):
+                    val = getattr(llm, attr_name, None)
+                    if val is not None:
+                        span.set_attribute(f"llm.{attr_name}", val)
             answer, usage = llm.generate(prompt)
             citations = _build_citations(chunks)
             if span and span.is_recording():
+                span.set_attribute("llm.response_length", len(answer))
+                span.set_attribute("llm.citation_count", len(citations))
                 span_set_output(span, {"answer": _truncate(answer), "citations": citations})
                 if usage:
                     span.set_attribute("llm.token_count.prompt", usage.prompt_tokens)
@@ -173,6 +200,8 @@ def answer_query(
 
         answer_with_citations = _format_answer_with_citations(answer, citations)
         if parent_span and parent_span.is_recording():
+            parent_span.set_attribute("rag.citation_count", len(citations))
+            parent_span.set_attribute("rag.answer_length", len(answer_with_citations))
             span_set_output(
                 parent_span, {"answer": answer_with_citations, "citations": citations}
             )

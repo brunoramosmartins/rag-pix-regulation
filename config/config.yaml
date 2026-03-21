@@ -28,6 +28,8 @@ llm:
   model: "llama3.2:3b"
   temperature: 0
   top_p: 1.0
+  num_ctx: 4096            # KV cache window — must be >= max_context_tokens + prompt overhead
+  num_predict: 1024        # max response tokens — regulatory answers can be long
 
 rag:
   max_context_tokens: 4096

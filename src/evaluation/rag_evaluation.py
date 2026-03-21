@@ -15,6 +15,9 @@ class RAGEvaluationResult:
     groundedness_score: float
     hallucination_detected: bool
     context_used: bool
+    answer_similarity: float = 0.0
+    concept_coverage: float = 0.0
+    quality_score: float = 0.0
 
 
 def compute_citation_coverage(
@@ -113,9 +116,14 @@ def evaluate_rag_response(
     expected_pages: set[int],
     precision_at_k: float,
     recall_at_k: float,
+    expected_answer_summary: str = "",
+    key_concepts: list[str] | None = None,
 ) -> RAGEvaluationResult:
     """
     Compute full RAG evaluation for a single response.
+
+    When expected_answer_summary is provided, also computes answer quality
+    metrics (similarity, concept coverage, quality score).
     """
     citation_cov = compute_citation_coverage(citations, retrieved_chunks)
     hallucination = detect_hallucination(answer, context, "")
@@ -123,6 +131,22 @@ def evaluate_rag_response(
     groundedness = (
         citation_cov * (1.0 if context_used else 0.5) * (0.0 if hallucination else 1.0)
     )
+
+    answer_sim = 0.0
+    concept_cov = 0.0
+    quality = 0.0
+
+    if expected_answer_summary:
+        from .answer_quality import compute_answer_quality
+
+        aq = compute_answer_quality(
+            generated=answer,
+            expected=expected_answer_summary,
+            key_concepts=key_concepts or [],
+        )
+        answer_sim = aq.answer_similarity
+        concept_cov = aq.concept_coverage
+        quality = aq.quality_score
 
     return RAGEvaluationResult(
         query_id=query_id,
@@ -132,4 +156,7 @@ def evaluate_rag_response(
         groundedness_score=groundedness,
         hallucination_detected=hallucination,
         context_used=context_used,
+        answer_similarity=answer_sim,
+        concept_coverage=concept_cov,
+        quality_score=quality,
     )

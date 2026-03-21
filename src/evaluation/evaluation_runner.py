@@ -114,6 +114,8 @@ def run_full_evaluation(
             expected_pages=expected_pages,
             precision_at_k=prec,
             recall_at_k=rec,
+            expected_answer_summary=q.get("expected_answer_summary", ""),
+            key_concepts=q.get("key_concepts", []),
         )
 
         per_query.append(
@@ -127,6 +129,9 @@ def run_full_evaluation(
                 "citation_coverage": result.citation_coverage,
                 "groundedness_score": result.groundedness_score,
                 "hallucination_detected": result.hallucination_detected,
+                "answer_similarity": result.answer_similarity,
+                "concept_coverage": result.concept_coverage,
+                "quality_score": result.quality_score,
             }
         )
         citation_coverages.append(result.citation_coverage)
@@ -139,6 +144,11 @@ def run_full_evaluation(
     # Compute metrics by difficulty tier
     by_difficulty = _aggregate_by_difficulty(per_query)
 
+    # Aggregate answer quality metrics
+    answer_sims = [q["answer_similarity"] for q in per_query]
+    concept_covs = [q["concept_coverage"] for q in per_query]
+    quality_scores = [q["quality_score"] for q in per_query]
+
     return {
         "retrieval": retrieval_metrics,
         "rag": {
@@ -149,6 +159,15 @@ def run_full_evaluation(
             if n_rag
             else 0.0,
             "hallucination_rate": round(hallucination_count / n_rag, 4)
+            if n_rag
+            else 0.0,
+            "answer_similarity_avg": round(sum(answer_sims) / n_rag, 4)
+            if n_rag
+            else 0.0,
+            "concept_coverage_avg": round(sum(concept_covs) / n_rag, 4)
+            if n_rag
+            else 0.0,
+            "quality_score_avg": round(sum(quality_scores) / n_rag, 4)
             if n_rag
             else 0.0,
             "n_queries": n_rag,
@@ -177,6 +196,15 @@ def _aggregate_by_difficulty(
             "ndcg_at_k": round(sum(q["ndcg_at_k"] for q in queries) / n, 4),
             "average_precision": round(
                 sum(q["average_precision"] for q in queries) / n, 4
+            ),
+            "answer_similarity": round(
+                sum(q.get("answer_similarity", 0) for q in queries) / n, 4
+            ),
+            "concept_coverage": round(
+                sum(q.get("concept_coverage", 0) for q in queries) / n, 4
+            ),
+            "quality_score": round(
+                sum(q.get("quality_score", 0) for q in queries) / n, 4
             ),
         }
     return result

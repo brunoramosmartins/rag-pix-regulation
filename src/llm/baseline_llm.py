@@ -18,10 +18,14 @@ class BaselineLLM(LLMClient):
         model: str = DEFAULT_MODEL,
         temperature: float = 0.0,
         top_p: float = 1.0,
+        num_ctx: int = 4096,
+        num_predict: int = 1024,
     ):
         self.model = model
         self.temperature = temperature
         self.top_p = top_p
+        self.num_ctx = num_ctx
+        self.num_predict = num_predict
 
     def generate(self, prompt: str) -> tuple[str, LLMUsage]:
         """Generate completion via Ollama chat API."""
@@ -38,8 +42,8 @@ class BaselineLLM(LLMClient):
             options={
                 "temperature": self.temperature,
                 "top_p": self.top_p,
-                "num_predict": 512,   # max response tokens — enough for regulatory answers
-                "num_ctx": 2048,      # KV cache window — keeps prefill fast on CPU/GPU
+                "num_predict": self.num_predict,
+                "num_ctx": self.num_ctx,
             },
         )
 
