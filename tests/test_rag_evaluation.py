@@ -66,3 +66,51 @@ def test_evaluate_rag_response() -> None:
     assert result.query_id == "q1"
     assert result.citation_coverage == 1.0
     assert result.hallucination_detected is False
+
+
+def test_evaluate_rag_response_backward_compat() -> None:
+    """Without answer quality params, new fields default to 0.0."""
+    result = evaluate_rag_response(
+        query_id="q1",
+        answer="Resposta.",
+        context="Contexto.",
+        citations=[],
+        retrieved_chunks=[],
+        expected_pages={1},
+        precision_at_k=0.5,
+        recall_at_k=0.5,
+    )
+    assert result.answer_similarity == 0.0
+    assert result.concept_coverage == 0.0
+    assert result.quality_score == 0.0
+
+
+def test_evaluate_rag_response_with_answer_quality() -> None:
+    """With expected_answer_summary, answer quality fields are populated."""
+    from unittest.mock import patch, MagicMock
+    import numpy as np
+    from src.evaluation.answer_quality import compute_answer_similarity as _real_sim
+
+    vec = np.array([1.0, 0.0])
+    mock_model = MagicMock()
+    mock_model.encode.return_value = np.array([vec, vec])
+
+    with patch(
+        "src.evaluation.answer_quality.compute_answer_similarity",
+        side_effect=lambda g, e, model=None: _real_sim(g, e, model=mock_model),
+    ):
+        result = evaluate_rag_response(
+            query_id="q1",
+            answer="O bloqueio de recursos é feito automaticamente.",
+            context="Contexto regulatório aqui.",
+            citations=[],
+            retrieved_chunks=[],
+            expected_pages={1},
+            precision_at_k=0.5,
+            recall_at_k=0.5,
+            expected_answer_summary="O bloqueio de recursos protege contra fraudes.",
+            key_concepts=["bloqueio de recursos", "fraudes"],
+        )
+        assert result.answer_similarity > 0.0
+        assert result.concept_coverage > 0.0
+        assert result.quality_score > 0.0

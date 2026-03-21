@@ -1,5 +1,11 @@
-"""Evaluation module - Retrieval quality, grounding, and hallucination metrics."""
+"""Evaluation module - Retrieval quality, grounding, answer quality, and hallucination metrics."""
 
+from .answer_quality import (
+    AnswerQualityResult,
+    compute_answer_quality,
+    compute_answer_similarity,
+    compute_concept_coverage,
+)
 from .dataset_loader import (
     get_expected_documents,
     get_expected_pages,
@@ -41,6 +47,10 @@ __all__ = [
     "compute_citation_coverage",
     "detect_hallucination",
     "evaluate_rag_response",
+    "AnswerQualityResult",
+    "compute_answer_quality",
+    "compute_answer_similarity",
+    "compute_concept_coverage",
     "run_retrieval_evaluation",
     "run_full_evaluation",
 ]
