@@ -312,3 +312,9 @@ def _set_result_attributes(span, results: list[RetrievalResult]) -> None:
             span.set_attribute(f"{prefix}.document.score", round(r.similarity_score, 4))
         if r.document_id:
             span.set_attribute(f"{prefix}.document.source", r.document_id)
+        if r.text:
+            span.set_attribute(f"{prefix}.document.content", r.text[:500])
+        meta = f"source={r.document_id}, page={r.page_number}"
+        if r.section_title:
+            meta += f", section={r.section_title}"
+        span.set_attribute(f"{prefix}.document.metadata", meta)
