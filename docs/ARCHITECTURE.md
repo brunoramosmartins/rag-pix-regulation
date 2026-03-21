@@ -8,23 +8,31 @@ This document describes the modular architecture for the RAG system that serves 
 
 ```mermaid
 flowchart TD
-    A[Regulatory PDFs<br/>BCB · MED 2.0] --> B[Ingestion<br/>pdf_loader · text_cleaner · metadata_extractor]
+    A["Regulatory PDFs · BCB · MED 2.0"] --> B["Ingestion · pdf_loader · text_cleaner · metadata_extractor"]
     B --> C[corpus_pages.jsonl]
-    C --> D[Chunking<br/>structural_segmenter → token_chunker]
+    C --> D["Chunking · structural_segmenter · token_chunker"]
     D --> E[corpus_chunks.jsonl]
-    E --> F[Embeddings<br/>BAAI/bge-m3]
-    F --> G[Weaviate<br/>Vector Database]
+    E --> F["Embeddings · BAAI/bge-m3"]
+    F --> G["Weaviate · Vector Database"]
 
-    H[User Query] --> I[Query Embedding<br/>BAAI/bge-m3]
-    I --> J[Vector Search<br/>ANN · top-k]
-    G --> J
-    J --> K[Context Builder<br/>token budget · citation markers]
-    K --> L[Prompt Template<br/>system instruction + context + query]
-    L --> M[LLM<br/>Llama-3.2-3B via Ollama]
+    H[User Query] --> I["Query Embedding · BAAI/bge-m3"]
+    I --> J{"Search Strategy"}
+    J -->|vector| J1["Vector Search · ANN · top-k"]
+    J -->|keyword| J2["Keyword Search · BM25"]
+    J -->|hybrid| J3["Hybrid Search · BM25 + Vector"]
+    G --> J1
+    G --> J2
+    G --> J3
+    J1 --> R["Reranking · cross-encoder"]
+    J2 --> R
+    J3 --> R
+    R --> K["Context Builder · token budget · citation markers"]
+    K --> L["Prompt Template · system instruction + context + query"]
+    L --> M["LLM · Llama-3.2-3B via Ollama"]
     M --> N[Answer + Citations]
 
-    N --> O[Evaluation<br/>Precision@K · Recall@K · Grounding]
-    N --> P[Phoenix Tracing<br/>OpenTelemetry spans]
+    N --> O["Evaluation · Precision-K · Recall-K · Answer Quality · Grounding"]
+    N --> P["Phoenix Tracing · OpenTelemetry spans"]
 ```
 
 ---
@@ -118,9 +126,9 @@ flowchart TD
 | **chunking** | `structural_segmenter`, `token_chunker`, `serializer`, `loader` | `corpus_pages.jsonl` | `corpus_chunks.jsonl` |
 | **embeddings** | `embedding_generator`, `validation` | `corpus_chunks.jsonl` | `(Chunk, vector)` pairs |
 | **vectorstore** | `weaviate_client`, `indexer` | `(Chunk, vector)` pairs | Weaviate collection |
-| **retrieval** | `query_embedding`, `vector_search`, `retriever` | User query string | `list[RetrievalResult]` |
+| **retrieval** | `query_embedding`, `vector_search`, `keyword_search`, `hybrid_search`, `reranker`, `retriever` | User query string | `list[RetrievalResult]` |
 | **rag** | `context_builder`, `prompt_template`, `rag_pipeline` | `list[RetrievalResult]` + LLM | `RAGResponse` with citations |
-| **evaluation** | `dataset_loader`, `retrieval_metrics`, `rag_evaluation`, `evaluation_runner` | Dataset + RAG fn | JSON evaluation report |
+| **evaluation** | `dataset_loader`, `retrieval_metrics`, `rag_evaluation`, `answer_quality`, `evaluation_runner` | Dataset + RAG fn | JSON evaluation report |
 | **observability** | `tracing` | Span names + attributes | OpenTelemetry spans → Phoenix |
 | **demo** | `demo_service` | Query string | Baseline + RAG result dicts |
 
@@ -144,8 +152,11 @@ corpus_chunks.jsonl
 
 User query: str
   → [retrieval.query_embedding] → list[float]  (1024-dim)
-  → [retrieval.vector_search] → list[dict]
-  → [retrieval.retriever] → list[RetrievalResult]
+  → [retrieval.retriever] → strategy dispatch:
+      vector:  [retrieval.vector_search] → list[dict]
+      keyword: [retrieval.keyword_search] → list[dict]
+      hybrid:  [retrieval.hybrid_search] → list[dict]  (BM25 + vector, configurable alpha)
+  → [retrieval.reranker] → list[RetrievalResult]  (cross-encoder re-scored)
   → [rag.context_builder] → str  (token-budgeted context)
   → [rag.prompt_template] → str  (final prompt)
   → [llm.baseline_llm] → (answer: str, usage: LLMUsage)
@@ -189,7 +200,7 @@ rag-pix-regulation/
 - **Extensibility** — `LLMClient` abstract interface allows swapping inference backends; vector store abstracted behind `weaviate_client`
 - **Testability** — Unit tests per module; integration tests skip gracefully when services are unavailable
 - **Traceability** — Every answer cites source document and page; chunk IDs are deterministic (`{doc_id}_p{page}_s{segment}_c{chunk}`)
-- **Observability** — Phoenix tracing wraps all RAG spans (retriever → context → prompt → LLM) with input/output attributes
+- **Observability** — Phoenix tracing wraps all RAG spans (embedding → search → reranking → context → prompt → LLM) with granular input/output attributes per substep
 
 ---
 
