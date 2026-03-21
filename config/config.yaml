@@ -13,7 +13,11 @@ chunking:
 retrieval:
   top_k: 10             # over-retrieve for reranking (reranker trims to top_n)
   collection: "PixRegulationChunks"
-  min_similarity: 0.35  # minimum cosine similarity to include a chunk
+  min_similarity: 0.35  # minimum cosine similarity (vector strategy only)
+  search_strategy: "hybrid"  # "vector" | "keyword" | "hybrid"
+  hybrid:
+    alpha: 0.5           # 0.0 = pure BM25, 1.0 = pure vector
+    fusion_type: "ranked" # "ranked" (RRF) or "relative_score"
 
 reranking:
   enabled: true

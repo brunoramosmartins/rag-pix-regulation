@@ -5,13 +5,15 @@ from .models import RetrievalResult
 __all__ = [
     "embed_query",
     "vector_search",
+    "keyword_search",
+    "hybrid_search",
     "retrieve",
     "RetrievalResult",
 ]
 
 
 def __getattr__(name: str):
-    """Lazy import for heavy modules (embed_query, retrieve, vector_search)."""
+    """Lazy import for heavy modules (embed_query, retrieve, vector_search, etc.)."""
     if name == "embed_query":
         from .query_embedding import embed_query
         return embed_query
@@ -21,4 +23,10 @@ def __getattr__(name: str):
     if name == "vector_search":
         from .vector_search import vector_search
         return vector_search
+    if name == "keyword_search":
+        from .keyword_search import keyword_search
+        return keyword_search
+    if name == "hybrid_search":
+        from .hybrid_search import hybrid_search
+        return hybrid_search
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
