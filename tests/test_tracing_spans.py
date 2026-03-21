@@ -4,8 +4,10 @@ Verifies that:
 - retriever.py creates inner spans for embedding, search, and reranking
 - rag_pipeline.py sets enriched attributes on existing spans
 - All spans are safe to use when tracing is unavailable (no-op fallback)
+- Spans are NOT created when there is no active parent context (no orphans)
 """
 
+from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
 import src.retrieval.retriever as retriever_module
@@ -55,6 +57,30 @@ RERANK_CONFIG = {
 }
 
 
+def _make_capture_span(span_names, captured_attrs=None):
+    """Create a _capture_span context manager that records span names and attributes."""
+
+    @contextmanager
+    def _capture_span(name, attributes=None, openinference_span_kind=None):
+        span_names.append(name)
+        mock_span = MagicMock()
+        mock_span.is_recording.return_value = True
+        if captured_attrs is not None:
+            mock_span.set_attribute.side_effect = lambda k, v: captured_attrs.update({k: v})
+        yield mock_span
+
+    return _capture_span
+
+
+def _active_span_patches(span_names, captured_attrs=None):
+    """Return patch context managers that simulate an active parent span."""
+    capture_fn = _make_capture_span(span_names, captured_attrs)
+    return (
+        patch.object(retriever_module, "_has_active_span", return_value=True),
+        patch.object(retriever_module, "trace_span", side_effect=capture_fn),
+    )
+
+
 # --- Issue 1: Granular tracing spans in retrieval pipeline ---
 
 
@@ -65,21 +91,13 @@ class TestRetrieverTracingSpans:
         """Vector strategy creates query_embedding + vector_search spans."""
         mock_embed = MagicMock(return_value=[0.0] * 1024)
         span_names: list[str] = []
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            span_names.append(name)
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            yield mock_span
+        p1, p2 = _active_span_patches(span_names)
 
         with (
             patch.object(retriever_module, "_load_config", return_value=VECTOR_CONFIG),
             patch.object(vs_module, "vector_search", return_value=[_make_raw_result()]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
         ):
             retriever_module.retrieve("test", top_k=5, search_strategy="vector")
 
@@ -89,20 +107,12 @@ class TestRetrieverTracingSpans:
     def test_keyword_strategy_creates_keyword_search_span(self) -> None:
         """Keyword strategy creates keyword_search span (no embedding span)."""
         span_names: list[str] = []
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            span_names.append(name)
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            yield mock_span
+        p1, p2 = _active_span_patches(span_names)
 
         with (
             patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
         ):
             retriever_module.retrieve("Art. 3", top_k=5, search_strategy="keyword")
 
@@ -113,21 +123,13 @@ class TestRetrieverTracingSpans:
         """Hybrid strategy creates query_embedding + hybrid_search spans."""
         mock_embed = MagicMock(return_value=[0.0] * 1024)
         span_names: list[str] = []
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            span_names.append(name)
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            yield mock_span
+        p1, p2 = _active_span_patches(span_names)
 
         with (
             patch.object(retriever_module, "_load_config", return_value=HYBRID_CONFIG),
             patch.object(hs_module, "hybrid_search", return_value=[_make_raw_result()]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
         ):
             retriever_module.retrieve("chave Pix", top_k=5, search_strategy="hybrid")
 
@@ -142,20 +144,12 @@ class TestRetrieverTracingSpans:
             RetrievalResult(text="text c2", chunk_id="c2", document_id="doc", page_number=1, section_title=None, similarity_score=0.85),
         ]
         span_names: list[str] = []
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            span_names.append(name)
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            yield mock_span
+        p1, p2 = _active_span_patches(span_names)
 
         with (
             patch.object(retriever_module, "_load_config", return_value=RERANK_CONFIG),
             patch.object(ks_module, "keyword_search", return_value=raw),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
             patch("src.retrieval.reranker.rerank", return_value=reranked),
         ):
             results = retriever_module.retrieve("test", top_k=2, search_strategy="keyword")
@@ -165,28 +159,14 @@ class TestRetrieverTracingSpans:
 
     def test_span_attributes_include_strategy_and_latency(self) -> None:
         """Search spans receive strategy and latency attributes."""
+        span_names: list[str] = []
         captured_attrs: dict = {}
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-
-            def _set_attr(key, val):
-                captured_attrs[key] = val
-
-            mock_span.set_attribute.side_effect = _set_attr
-            if name == "keyword_search":
-                yield mock_span
-            else:
-                yield mock_span
+        p1, p2 = _active_span_patches(span_names, captured_attrs)
 
         with (
             patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
         ):
             retriever_module.retrieve("test", top_k=5, search_strategy="keyword")
 
@@ -195,33 +175,49 @@ class TestRetrieverTracingSpans:
 
     def test_result_attributes_set_on_search_span(self) -> None:
         """Per-document attributes are set on search spans."""
+        span_names: list[str] = []
         captured_attrs: dict = {}
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-
-            def _set_attr(key, val):
-                captured_attrs[key] = val
-
-            mock_span.set_attribute.side_effect = _set_attr
-            yield mock_span
+        p1, p2 = _active_span_patches(span_names, captured_attrs)
 
         mock_embed = MagicMock(return_value=[0.0] * 1024)
         with (
             patch.object(retriever_module, "_load_config", return_value=VECTOR_CONFIG),
             patch.object(vs_module, "vector_search", return_value=[_make_raw_result("c1", 0.9)]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
-            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+            p1, p2,
         ):
             retriever_module.retrieve("test", top_k=5, search_strategy="vector")
 
         assert "retrieval.documents.0.document.id" in captured_attrs
         assert captured_attrs["retrieval.documents.0.document.id"] == "c1"
         assert "retrieval.documents.0.document.score" in captured_attrs
+
+
+# --- No orphan spans when called standalone ---
+
+
+class TestNoOrphanSpans:
+    """Verify that spans are NOT created when there's no active parent context."""
+
+    def test_no_spans_without_parent_context(self) -> None:
+        """When _has_active_span returns False, no child spans are created."""
+        span_names: list[str] = []
+
+        @contextmanager
+        def _capture_span(name, attributes=None, openinference_span_kind=None):
+            span_names.append(name)
+            yield MagicMock()
+
+        with (
+            patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
+            patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
+            patch.object(retriever_module, "_has_active_span", return_value=False),
+            patch.object(retriever_module, "trace_span", side_effect=_capture_span),
+        ):
+            results = retriever_module.retrieve("test", top_k=5, search_strategy="keyword")
+
+        assert len(span_names) == 0  # No orphan spans created
+        assert len(results) == 1  # But retrieval still works
 
 
 # --- Issue 2: Enriched span attributes on RAG pipeline ---
@@ -250,12 +246,7 @@ class TestRAGPipelineEnrichedSpans:
             ),
         ]
 
-    def test_rag_parent_span_has_config_attributes(self) -> None:
-        """rag_pipeline span captures top_k, max_chunks, max_context_tokens."""
-        captured: dict[str, dict] = {}
-
-        from contextlib import contextmanager
-
+    def _make_capture(self, captured):
         @contextmanager
         def _capture_span(name, attributes=None, openinference_span_kind=None):
             mock_span = MagicMock()
@@ -265,13 +256,18 @@ class TestRAGPipelineEnrichedSpans:
             captured[name] = attrs
             yield mock_span
 
+        return _capture_span
+
+    def test_rag_parent_span_has_config_attributes(self) -> None:
+        """rag_pipeline span captures top_k, max_chunks, max_context_tokens."""
+        captured: dict[str, dict] = {}
         chunks = self._make_chunks()
         mock_llm = MagicMock()
         mock_llm.model = "llama3.2:3b"
         mock_llm.generate.return_value = ("Answer", MagicMock(prompt_tokens=100, completion_tokens=50, total_tokens=150))
 
         with (
-            patch("src.rag.rag_pipeline.trace_span", side_effect=_capture_span),
+            patch("src.rag.rag_pipeline.trace_span", side_effect=self._make_capture(captured)),
             patch("src.rag.rag_pipeline.span_set_input"),
             patch("src.rag.rag_pipeline.span_set_output"),
             patch("src.rag.rag_pipeline.retrieve", return_value=chunks),
@@ -288,25 +284,13 @@ class TestRAGPipelineEnrichedSpans:
     def test_retrieval_span_has_score_statistics(self) -> None:
         """Retrieval span captures score.max, score.min, score.mean."""
         captured: dict[str, dict] = {}
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            attrs = {}
-            mock_span.set_attribute.side_effect = lambda k, v: attrs.update({k: v})
-            captured[name] = attrs
-            yield mock_span
-
         chunks = self._make_chunks()
         mock_llm = MagicMock()
         mock_llm.model = "llama3.2:3b"
         mock_llm.generate.return_value = ("Answer", MagicMock(prompt_tokens=100, completion_tokens=50, total_tokens=150))
 
         with (
-            patch("src.rag.rag_pipeline.trace_span", side_effect=_capture_span),
+            patch("src.rag.rag_pipeline.trace_span", side_effect=self._make_capture(captured)),
             patch("src.rag.rag_pipeline.span_set_input"),
             patch("src.rag.rag_pipeline.span_set_output"),
             patch("src.rag.rag_pipeline.retrieve", return_value=chunks),
@@ -326,18 +310,6 @@ class TestRAGPipelineEnrichedSpans:
     def test_llm_span_has_model_config_and_response_length(self) -> None:
         """LLM span captures model config params and response length."""
         captured: dict[str, dict] = {}
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            attrs = {}
-            mock_span.set_attribute.side_effect = lambda k, v: attrs.update({k: v})
-            captured[name] = attrs
-            yield mock_span
-
         chunks = self._make_chunks()
         mock_llm = MagicMock()
         mock_llm.model = "llama3.2:3b"
@@ -347,7 +319,7 @@ class TestRAGPipelineEnrichedSpans:
         mock_llm.generate.return_value = ("Resposta sobre Pix", MagicMock(prompt_tokens=200, completion_tokens=80, total_tokens=280))
 
         with (
-            patch("src.rag.rag_pipeline.trace_span", side_effect=_capture_span),
+            patch("src.rag.rag_pipeline.trace_span", side_effect=self._make_capture(captured)),
             patch("src.rag.rag_pipeline.span_set_input"),
             patch("src.rag.rag_pipeline.span_set_output"),
             patch("src.rag.rag_pipeline.retrieve", return_value=chunks),
@@ -368,27 +340,14 @@ class TestRAGPipelineEnrichedSpans:
     def test_context_building_span_enriched(self) -> None:
         """Context building span captures char_count and chunk_count."""
         captured: dict[str, dict] = {}
-
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _capture_span(name, attributes=None, openinference_span_kind=None):
-            mock_span = MagicMock()
-            mock_span.is_recording.return_value = True
-            attrs = {}
-            mock_span.set_attribute.side_effect = lambda k, v: attrs.update({k: v})
-            captured[name] = attrs
-            yield mock_span
-
         chunks = self._make_chunks()
         mock_llm = MagicMock()
         mock_llm.model = "test"
         mock_llm.generate.return_value = ("ans", MagicMock(prompt_tokens=10, completion_tokens=5, total_tokens=15))
-
         context_text = "Built context with regulatory text"
 
         with (
-            patch("src.rag.rag_pipeline.trace_span", side_effect=_capture_span),
+            patch("src.rag.rag_pipeline.trace_span", side_effect=self._make_capture(captured)),
             patch("src.rag.rag_pipeline.span_set_input"),
             patch("src.rag.rag_pipeline.span_set_output"),
             patch("src.rag.rag_pipeline.retrieve", return_value=chunks),
@@ -410,19 +369,11 @@ class TestTracingFallbackSafety:
     """Verify that retriever works fine when tracing is unavailable."""
 
     def test_retrieve_works_without_tracing(self) -> None:
-        """retrieve() succeeds when trace_span yields None (no-op)."""
-        from contextlib import contextmanager
-
-        @contextmanager
-        def _noop_span(name, attributes=None, openinference_span_kind=None):
-            yield None
-
+        """retrieve() succeeds when _has_active_span returns False."""
         with (
             patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
-            patch.object(retriever_module, "trace_span", side_effect=_noop_span),
-            patch.object(retriever_module, "span_set_input"),
-            patch.object(retriever_module, "span_set_output"),
+            patch.object(retriever_module, "_has_active_span", return_value=False),
         ):
             results = retriever_module.retrieve("test", top_k=5, search_strategy="keyword")
             assert len(results) == 1
