@@ -122,6 +122,7 @@ def retrieve(
                 "retrieval.strategy": "keyword",
                 "retrieval.top_k": fetch_k,
             },
+            openinference_span_kind="retriever",
         ) as span:
             t0 = time.perf_counter()
             raw_results = keyword_search(query, top_k=fetch_k)
@@ -146,6 +147,7 @@ def retrieve(
         with trace_span(
             "query_embedding",
             attributes={"embedding.model": "BAAI/bge-m3"},
+            openinference_span_kind="embedding",
         ) as span:
             t0 = time.perf_counter()
             query_vector = embed_query(query)
@@ -166,6 +168,7 @@ def retrieve(
                 "retrieval.hybrid.alpha": resolved_alpha,
                 "retrieval.hybrid.fusion_type": fusion_type,
             },
+            openinference_span_kind="retriever",
         ) as span:
             t0 = time.perf_counter()
             raw_results = hybrid_search(
@@ -193,6 +196,7 @@ def retrieve(
         with trace_span(
             "query_embedding",
             attributes={"embedding.model": "BAAI/bge-m3"},
+            openinference_span_kind="embedding",
         ) as span:
             t0 = time.perf_counter()
             query_vector = embed_query(query)
@@ -212,6 +216,7 @@ def retrieve(
                 "retrieval.top_k": fetch_k,
                 "retrieval.min_similarity": min_similarity,
             },
+            openinference_span_kind="retriever",
         ) as span:
             t0 = time.perf_counter()
             raw_results = vector_search(
@@ -241,6 +246,7 @@ def retrieve(
                 "reranking.input_count": len(results),
                 "reranking.top_n": top_n,
             },
+            openinference_span_kind="reranker",
         ) as span:
             t0 = time.perf_counter()
             logger.info(
