@@ -21,6 +21,30 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+def _has_active_span() -> bool:
+    """Check if there's an active parent span (i.e. we're inside a traced pipeline).
+
+    Returns False when tracing is disabled or when retrieve() is called
+    standalone (e.g. from evaluation runner), avoiding orphan spans in Phoenix.
+    """
+    try:
+        from opentelemetry import trace as otel_trace
+
+        current = otel_trace.get_current_span()
+        return current is not None and current.is_recording()
+    except ImportError:
+        return False
+
+
+def _child_span(name, attributes=None, openinference_span_kind=None):
+    """Create a child span only when inside an active trace context."""
+    if _has_active_span():
+        return trace_span(name, attributes=attributes, openinference_span_kind=openinference_span_kind)
+    from contextlib import nullcontext
+
+    return nullcontext()
+
 VALID_STRATEGIES = ("vector", "keyword", "hybrid")
 
 
@@ -116,7 +140,7 @@ def retrieve(
     if strategy == "keyword":
         from .keyword_search import keyword_search
 
-        with trace_span(
+        with _child_span(
             "keyword_search",
             attributes={
                 "retrieval.strategy": "keyword",
@@ -144,7 +168,7 @@ def retrieve(
         fusion_type = hybrid_cfg.get("fusion_type", "ranked")
 
         # Trace query embedding
-        with trace_span(
+        with _child_span(
             "query_embedding",
             attributes={"embedding.model": "BAAI/bge-m3"},
             openinference_span_kind="embedding",
@@ -160,7 +184,7 @@ def retrieve(
                 span_set_output(span, {"dimensions": len(query_vector), "latency_ms": elapsed_ms})
 
         # Trace hybrid search
-        with trace_span(
+        with _child_span(
             "hybrid_search",
             attributes={
                 "retrieval.strategy": "hybrid",
@@ -193,7 +217,7 @@ def retrieve(
         from .vector_search import vector_search
 
         # Trace query embedding
-        with trace_span(
+        with _child_span(
             "query_embedding",
             attributes={"embedding.model": "BAAI/bge-m3"},
             openinference_span_kind="embedding",
@@ -209,7 +233,7 @@ def retrieve(
                 span_set_output(span, {"dimensions": len(query_vector), "latency_ms": elapsed_ms})
 
         # Trace vector search
-        with trace_span(
+        with _child_span(
             "vector_search",
             attributes={
                 "retrieval.strategy": "vector",
@@ -239,7 +263,7 @@ def retrieve(
         model_name = rerank_cfg.get("model", "cross-encoder/ms-marco-MiniLM-L-6-v2")
         top_n = rerank_cfg.get("top_n", top_k)
 
-        with trace_span(
+        with _child_span(
             "reranking",
             attributes={
                 "reranking.model": model_name,
