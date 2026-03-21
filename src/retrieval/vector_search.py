@@ -2,8 +2,7 @@
 
 from typing import Any
 
-from src.embeddings.validation import BGE_M3_DIMENSIONS
-from src.vectorstore.weaviate_client import CHUNK_COLLECTION, get_weaviate_client
+from src.vectorstore.weaviate_client import BGE_M3_DIMENSIONS, CHUNK_COLLECTION, get_weaviate_client
 
 
 def vector_search(
