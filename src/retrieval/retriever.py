@@ -70,6 +70,22 @@ def _raw_to_results(raw_results: list[dict]) -> list[RetrievalResult]:
     ]
 
 
+def _deduplicate(results: list[RetrievalResult]) -> list[RetrievalResult]:
+    """Remove duplicate chunks by chunk_id, keeping the highest-scored entry."""
+    seen: dict[str, RetrievalResult] = {}
+    for r in results:
+        key = r.chunk_id or str(id(r))
+        existing = seen.get(key)
+        if existing is None:
+            seen[key] = r
+        elif (r.similarity_score or 0.0) > (existing.similarity_score or 0.0):
+            seen[key] = r
+    deduped = list(seen.values())
+    if len(deduped) < len(results):
+        logger.info("Deduplicated %d → %d chunks", len(results), len(deduped))
+    return deduped
+
+
 def retrieve(
     query: str,
     top_k: int = 5,
@@ -245,6 +261,9 @@ def retrieve(
                 _set_result_attributes(span, results)
                 span_set_output(span, {"count": len(results), "latency_ms": elapsed_ms})
 
+    # Deduplicate before reranking to avoid wasting cross-encoder inference
+    results = _deduplicate(results)
+
     # Apply reranking if enabled
     if reranking_enabled and results:
         from .reranker import rerank
@@ -259,7 +278,7 @@ def retrieve(
                 "reranking.input_count": len(results),
                 "reranking.top_n": top_n,
             },
-            openinference_span_kind="reranker",
+            openinference_span_kind="retriever",
         ) as span:
             t0 = time.perf_counter()
             logger.info(
@@ -281,9 +300,17 @@ def retrieve(
                         span.set_attribute("reranking.top_score", round(max(scores), 4))
                         span.set_attribute("reranking.min_score", round(min(scores), 4))
                 _set_result_attributes(span, results)
+                output_docs = [
+                    {
+                        "rank": i + 1,
+                        "chunk_id": r.chunk_id,
+                        "score": round(r.similarity_score, 4) if r.similarity_score else None,
+                    }
+                    for i, r in enumerate(results)
+                ]
                 span_set_output(
                     span,
-                    {"count": len(results), "latency_ms": elapsed_ms},
+                    {"count": len(results), "latency_ms": elapsed_ms, "reranked_documents": output_docs},
                 )
 
     return results

@@ -10,6 +10,19 @@ def _esc(s: str) -> str:
     return html.escape(str(s)) if s else ""
 
 
+def _format_answer(raw: str) -> str:
+    """Convert plain-text answer to HTML paragraphs with controlled spacing."""
+    if not raw:
+        return ""
+    paragraphs = raw.strip().split("\n\n")
+    formatted = []
+    for p in paragraphs:
+        escaped = html.escape(p.strip())
+        escaped = escaped.replace("\n", "<br>")
+        formatted.append(f"<p>{escaped}</p>")
+    return "".join(formatted)
+
+
 def render_metrics_row(bl: dict[str, Any], rag: dict[str, Any]) -> None:
     """Render the top-level metrics cards."""
     st.markdown(
@@ -43,8 +56,8 @@ def render_metrics_row(bl: dict[str, Any], rag: dict[str, Any]) -> None:
 
 def render_comparison(bl: dict[str, Any], rag: dict[str, Any]) -> None:
     """Render side-by-side Baseline vs RAG comparison cards."""
-    bl_ans = _esc(bl["answer"])
-    rag_ans = _esc(rag["answer"])
+    bl_ans = _format_answer(bl["answer"])
+    rag_ans = _format_answer(rag["answer"])
 
     col_bl, col_vs, col_rag = st.columns([10, 1, 10])
 
