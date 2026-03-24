@@ -44,3 +44,7 @@ ollama:
 phoenix:
   host: "localhost"
   port: 6006
+
+logging:
+  level: "INFO"
+  format: "text"              # "text" (human-readable) or "json" (structured)

@@ -17,11 +17,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.ingestion import load_pdfs_from_dir  # noqa: E402
 from src.ingestion.serializer import save_documents_jsonl  # noqa: E402
+from src.config.logging import setup_logging  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s | %(message)s",
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 

@@ -68,25 +68,11 @@ class RAGResponse:
     llm_usage: LLMUsage | None = None
 
 
-def _load_config() -> dict:
-    """Load full config from config.yaml. Returns empty dict on failure."""
-    try:
-        import yaml
-        from pathlib import Path
-
-        config_path = Path(__file__).resolve().parent.parent.parent / "config" / "config.yaml"
-        if config_path.exists():
-            with open(config_path) as f:
-                return yaml.safe_load(f) or {}
-    except Exception:
-        pass
-    return {}
-
-
 def _default_retrieve(query: str, top_k: int) -> list[RetrievalResult]:
-    cfg = _load_config().get("retrieval", {})
-    min_similarity = cfg.get("min_similarity", 0.0)
-    return retrieve(query, top_k=top_k, min_similarity=min_similarity)
+    from src.config import get_settings
+
+    settings = get_settings()
+    return retrieve(query, top_k=top_k, min_similarity=settings.retrieval.min_similarity)
 
 
 def answer_query(
@@ -108,8 +94,9 @@ def answer_query(
     retrieve_fn = retriever or _default_retrieve
 
     if max_context_tokens is None:
-        cfg = _load_config().get("rag", {})
-        max_context_tokens = cfg.get("max_context_tokens", 2048)
+        from src.config import get_settings
+
+        max_context_tokens = get_settings().rag.max_context_tokens
 
     with trace_span("rag_pipeline", openinference_span_kind="chain") as parent_span:
         span_set_input(parent_span, query)

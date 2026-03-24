@@ -18,11 +18,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.vectorstore.indexer import index_chunks  # noqa: E402
 from src.vectorstore.weaviate_client import is_weaviate_ready  # noqa: E402
+from src.config.logging import setup_logging  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s | %(message)s",
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 CHUNKS_PATH = PROJECT_ROOT / "data" / "processed" / "corpus_chunks.jsonl"

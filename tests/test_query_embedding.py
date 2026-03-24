@@ -1,7 +1,11 @@
 """Unit tests for query embedding."""
 
+import pytest
+
 from src.embeddings.validation import BGE_M3_DIMENSIONS
 from src.retrieval.query_embedding import embed_query
+
+pytestmark = pytest.mark.integration
 
 
 def test_embed_query_dimensionality() -> None:

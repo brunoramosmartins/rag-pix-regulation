@@ -30,18 +30,14 @@ jobs:
           python-version: "3.10"
           cache: "pip"
 
-      - name: Install lightweight dependencies
+      - name: Install dependencies
         run: |
-          pip install pydantic pymupdf pytest transformers
+          pip install pydantic pydantic-settings pymupdf pytest pytest-cov \
+                      transformers weaviate-client numpy pyyaml \
+                      python-json-logger ollama
 
-      - name: Run unit tests (no model/Weaviate required)
+      - name: Run unit tests with coverage
         run: |
-          pytest tests/test_text_cleaner.py \
-                 tests/test_metadata_extractor.py \
-                 tests/test_serializer.py \
-                 tests/test_structural_segmenter.py \
-                 tests/test_retrieval_metrics.py \
-                 tests/test_rag_evaluation.py \
-                 tests/test_dataset_loader.py \
-                 tests/test_prompt_template.py \
+          pytest -m "not slow and not integration" \
+                 --cov=src --cov-report=term-missing \
                  -v

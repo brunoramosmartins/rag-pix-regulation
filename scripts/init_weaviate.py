@@ -21,11 +21,9 @@ from src.vectorstore.weaviate_client import (  # noqa: E402
     is_weaviate_ready,
     validate_chunk_schema,
 )
+from src.config.logging import setup_logging  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s | %(message)s",
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 
