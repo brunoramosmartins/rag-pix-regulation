@@ -21,7 +21,12 @@ sys.path.insert(0, str(PROJECT_ROOT))
 try:
     from phoenix.otel import register
 
-    register(project_name="rag-pix-regulation", auto_instrument=False)
+    register(
+        project_name="rag-pix-regulation",
+        endpoint="http://localhost:6006/v1/traces",
+        protocol="http/protobuf",
+        auto_instrument=False,
+    )
 except ImportError:
     pass
 
