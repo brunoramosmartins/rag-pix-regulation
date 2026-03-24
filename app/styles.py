@@ -178,10 +178,12 @@ CSS = """
   /* ── Response text ── */
   .response-text {
     font-size: 0.91rem;
-    line-height: 1.8;
+    line-height: 1.7;
     color: #1e293b;
     min-height: 120px;
-    white-space: pre-wrap;
+  }
+  .response-text p {
+    margin: 0.4em 0;
   }
 
   /* ── Meta row ── */
