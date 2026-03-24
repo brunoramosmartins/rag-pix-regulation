@@ -21,8 +21,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.evaluation.evaluation_runner import run_retrieval_evaluation
 from src.retrieval import retrieve
 from src.utils.system_checks import check_evaluation_dependencies
+from src.config.logging import setup_logging
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
+setup_logging()
 logger = logging.getLogger(__name__)
 
 DATASET_PATH = PROJECT_ROOT / "data" / "evaluation" / "rag_evaluation_dataset.json"

@@ -31,8 +31,9 @@ from src.utils.system_checks import (  # noqa: E402
     check_evaluation_dependencies,
     check_rag_dependencies,
 )
+from src.config.logging import setup_logging  # noqa: E402
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
+setup_logging()
 logger = logging.getLogger(__name__)
 
 DATASET_PATH = PROJECT_ROOT / "data" / "evaluation" / "rag_evaluation_dataset.json"

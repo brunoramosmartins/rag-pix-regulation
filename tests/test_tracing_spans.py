@@ -15,6 +15,7 @@ import src.retrieval.keyword_search as ks_module
 import src.retrieval.hybrid_search as hs_module
 import src.retrieval.vector_search as vs_module
 from src.retrieval.models import RetrievalResult
+from tests.helpers import make_test_settings
 
 
 def _make_raw_result(chunk_id: str = "c1", score: float = 0.8) -> dict:
@@ -29,32 +30,14 @@ def _make_raw_result(chunk_id: str = "c1", score: float = 0.8) -> dict:
     }
 
 
-VECTOR_CONFIG = {
-    "retrieval": {"search_strategy": "vector", "min_similarity": 0.0},
-    "reranking": {"enabled": False},
-}
-
-KEYWORD_CONFIG = {
-    "retrieval": {"search_strategy": "keyword"},
-    "reranking": {"enabled": False},
-}
-
-HYBRID_CONFIG = {
-    "retrieval": {
-        "search_strategy": "hybrid",
-        "hybrid": {"alpha": 0.5, "fusion_type": "ranked"},
-    },
-    "reranking": {"enabled": False},
-}
-
-RERANK_CONFIG = {
-    "retrieval": {"search_strategy": "keyword"},
-    "reranking": {
-        "enabled": True,
-        "model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
-        "top_n": 2,
-    },
-}
+VECTOR_SETTINGS = make_test_settings(search_strategy="vector")
+KEYWORD_SETTINGS = make_test_settings(search_strategy="keyword")
+HYBRID_SETTINGS = make_test_settings(
+    search_strategy="hybrid", hybrid_alpha=0.5, hybrid_fusion_type="ranked",
+)
+RERANK_SETTINGS = make_test_settings(
+    search_strategy="keyword", reranking_enabled=True, reranking_top_n=2,
+)
 
 
 def _make_capture_span(span_names, captured_attrs=None):
@@ -94,7 +77,7 @@ class TestRetrieverTracingSpans:
         p1, p2 = _active_span_patches(span_names)
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=VECTOR_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=VECTOR_SETTINGS),
             patch.object(vs_module, "vector_search", return_value=[_make_raw_result()]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
             p1, p2,
@@ -110,7 +93,7 @@ class TestRetrieverTracingSpans:
         p1, p2 = _active_span_patches(span_names)
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=KEYWORD_SETTINGS),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
             p1, p2,
         ):
@@ -126,7 +109,7 @@ class TestRetrieverTracingSpans:
         p1, p2 = _active_span_patches(span_names)
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=HYBRID_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=HYBRID_SETTINGS),
             patch.object(hs_module, "hybrid_search", return_value=[_make_raw_result()]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
             p1, p2,
@@ -147,7 +130,7 @@ class TestRetrieverTracingSpans:
         p1, p2 = _active_span_patches(span_names)
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=RERANK_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=RERANK_SETTINGS),
             patch.object(ks_module, "keyword_search", return_value=raw),
             p1, p2,
             patch("src.retrieval.reranker.rerank", return_value=reranked),
@@ -164,7 +147,7 @@ class TestRetrieverTracingSpans:
         p1, p2 = _active_span_patches(span_names, captured_attrs)
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=KEYWORD_SETTINGS),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
             p1, p2,
         ):
@@ -181,7 +164,7 @@ class TestRetrieverTracingSpans:
 
         mock_embed = MagicMock(return_value=[0.0] * 1024)
         with (
-            patch.object(retriever_module, "_load_config", return_value=VECTOR_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=VECTOR_SETTINGS),
             patch.object(vs_module, "vector_search", return_value=[_make_raw_result("c1", 0.9)]),
             patch.dict("sys.modules", {"src.retrieval.query_embedding": MagicMock(embed_query=mock_embed)}),
             p1, p2,
@@ -209,7 +192,7 @@ class TestNoOrphanSpans:
             yield MagicMock()
 
         with (
-            patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=KEYWORD_SETTINGS),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
             patch.object(retriever_module, "_has_active_span", return_value=False),
             patch.object(retriever_module, "trace_span", side_effect=_capture_span),
@@ -371,7 +354,7 @@ class TestTracingFallbackSafety:
     def test_retrieve_works_without_tracing(self) -> None:
         """retrieve() succeeds when _has_active_span returns False."""
         with (
-            patch.object(retriever_module, "_load_config", return_value=KEYWORD_CONFIG),
+            patch.object(retriever_module, "_get_settings", return_value=KEYWORD_SETTINGS),
             patch.object(ks_module, "keyword_search", return_value=[_make_raw_result()]),
             patch.object(retriever_module, "_has_active_span", return_value=False),
         ):

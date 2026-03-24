@@ -15,20 +15,37 @@ _client: weaviate.WeaviateClient | None = None
 
 
 def get_weaviate_client(
-    host: str = "localhost",
-    port: int = 8080,
-    grpc_port: int = 50051,
+    host: str | None = None,
+    port: int | None = None,
+    grpc_port: int | None = None,
 ) -> weaviate.WeaviateClient:
-    """Connect to local Weaviate instance. Reuses connection if available."""
+    """Connect to local Weaviate instance. Reuses connection if available.
+
+    When called without arguments, reads host/port from centralized settings.
+    """
     global _client
     if _client is None:
+        if host is None or port is None or grpc_port is None:
+            from src.config import get_settings
+
+            ws = get_settings().weaviate
+            host = host or ws.host
+            port = port or ws.port
+            grpc_port = grpc_port or ws.grpc_port
         _client = weaviate.connect_to_local(host=host, port=port, grpc_port=grpc_port)
     return _client
 
 
-def is_weaviate_ready(host: str = "localhost", port: int = 8080) -> bool:
+def is_weaviate_ready(host: str | None = None, port: int | None = None) -> bool:
     """Check if Weaviate is reachable via REST API."""
     import requests
+
+    if host is None or port is None:
+        from src.config import get_settings
+
+        ws = get_settings().weaviate
+        host = host or ws.host
+        port = port or ws.port
 
     try:
         r = requests.get(f"http://{host}:{port}/v1/meta", timeout=2)

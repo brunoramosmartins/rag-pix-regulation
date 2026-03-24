@@ -13,11 +13,11 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s | %(message)s",
-)
+from src.config.logging import setup_logging  # noqa: E402
+
+setup_logging()
 logger = logging.getLogger(__name__)
 
 STEPS = [

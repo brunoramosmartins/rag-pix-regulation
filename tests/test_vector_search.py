@@ -6,6 +6,8 @@ from src.retrieval.query_embedding import embed_query
 from src.retrieval.vector_search import vector_search
 from src.vectorstore.weaviate_client import is_weaviate_ready
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.skipif(
     not is_weaviate_ready(),

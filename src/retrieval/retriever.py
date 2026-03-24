@@ -2,7 +2,6 @@
 
 import logging
 import time
-from pathlib import Path
 
 from .models import RetrievalResult
 
@@ -48,18 +47,11 @@ def _child_span(name, attributes=None, openinference_span_kind=None):
 VALID_STRATEGIES = ("vector", "keyword", "hybrid")
 
 
-def _load_config() -> dict:
-    """Load full config from config.yaml. Returns empty dict on failure."""
-    try:
-        import yaml
+def _get_settings():
+    """Lazy import to avoid circular imports and keep tf_keras chain safe."""
+    from src.config import get_settings
 
-        config_path = Path(__file__).resolve().parent.parent.parent / "config" / "config.yaml"
-        if config_path.exists():
-            with open(config_path) as f:
-                return yaml.safe_load(f) or {}
-    except Exception:
-        pass
-    return {}
+    return get_settings()
 
 
 def _raw_to_results(raw_results: list[dict]) -> list[RetrievalResult]:
@@ -119,13 +111,11 @@ def retrieve(
     list[RetrievalResult]
         Ranked retrieval results ordered by similarity/relevance score.
     """
-    cfg = _load_config()
-    retrieval_cfg = cfg.get("retrieval", {})
-    rerank_cfg = cfg.get("reranking", {})
-    reranking_enabled = rerank_cfg.get("enabled", False)
+    settings = _get_settings()
+    reranking_enabled = settings.reranking.enabled
 
     # Resolve search strategy
-    strategy = search_strategy or retrieval_cfg.get("search_strategy", "vector")
+    strategy = search_strategy or settings.retrieval.search_strategy
     if strategy not in VALID_STRATEGIES:
         raise ValueError(
             f"Invalid search_strategy: {strategy!r}. "
@@ -163,9 +153,8 @@ def retrieve(
         from .hybrid_search import hybrid_search
         from .query_embedding import embed_query
 
-        hybrid_cfg = retrieval_cfg.get("hybrid", {})
-        resolved_alpha = alpha if alpha is not None else hybrid_cfg.get("alpha", 0.5)
-        fusion_type = hybrid_cfg.get("fusion_type", "ranked")
+        resolved_alpha = alpha if alpha is not None else settings.retrieval.hybrid.alpha
+        fusion_type = settings.retrieval.hybrid.fusion_type
 
         # Trace query embedding
         with _child_span(
@@ -260,8 +249,8 @@ def retrieve(
     if reranking_enabled and results:
         from .reranker import rerank
 
-        model_name = rerank_cfg.get("model", "cross-encoder/ms-marco-MiniLM-L-6-v2")
-        top_n = rerank_cfg.get("top_n", top_k)
+        model_name = settings.reranking.model
+        top_n = settings.reranking.top_n
 
         with _child_span(
             "reranking",

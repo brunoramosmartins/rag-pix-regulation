@@ -5,6 +5,8 @@ import pytest
 from src.retrieval import RetrievalResult, retrieve
 from src.vectorstore.weaviate_client import is_weaviate_ready
 
+pytestmark = pytest.mark.integration
+
 
 def test_retrieval_result_has_required_fields() -> None:
     """RetrievalResult dataclass has expected fields."""

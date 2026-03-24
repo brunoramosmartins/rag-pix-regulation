@@ -21,11 +21,9 @@ from src.chunking.serializer import save_chunks_jsonl, validate_chunk_dataset  #
 from src.chunking.structural_segmenter import segment_page  # noqa: E402
 from src.chunking.token_chunker import chunk_segment  # noqa: E402
 from src.ingestion.models import Page  # noqa: E402
+from src.config.logging import setup_logging  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s | %(message)s",
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 PAGES_PATH = PROJECT_ROOT / "data" / "processed" / "corpus_pages.jsonl"

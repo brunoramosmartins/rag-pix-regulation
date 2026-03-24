@@ -19,6 +19,8 @@ from src.embeddings.validation import (
     validate_chunk_embedding_pairs,
 )
 
+pytestmark = pytest.mark.integration
+
 
 def _make_chunk(text: str = "Sample regulatory text.") -> Chunk:
     """Create a minimal Chunk for testing."""

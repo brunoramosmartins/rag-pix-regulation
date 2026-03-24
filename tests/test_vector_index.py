@@ -9,6 +9,8 @@ from src.vectorstore.weaviate_client import (
 )
 from src.chunking.models import Chunk
 
+pytestmark = pytest.mark.integration
+
 
 def _make_chunk() -> Chunk:
     """Create a minimal Chunk for testing."""

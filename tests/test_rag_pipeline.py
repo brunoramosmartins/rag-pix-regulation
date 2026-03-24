@@ -112,10 +112,7 @@ def test_answer_query_passes_top_k() -> None:
     assert calls == [("q", 7)]
 
 
-@pytest.mark.skipif(
-    True,
-    reason="Requires sentence_transformers/Weaviate; run manually when env is ready",
-)
+@pytest.mark.integration
 def test_answer_query_integration() -> None:
     """Integration test with citation footer."""
     mock_llm = MagicMock()
