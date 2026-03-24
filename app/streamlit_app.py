@@ -13,7 +13,12 @@ if str(PROJECT_ROOT) not in sys.path:
 # Register Phoenix tracer before RAG imports (optional; traces at http://localhost:6006)
 try:
     from phoenix.otel import register
-    register(project_name="rag-pix-regulation", auto_instrument=False)
+    register(
+        project_name="rag-pix-regulation",
+        endpoint="http://localhost:6006/v1/traces",
+        protocol="http/protobuf",
+        auto_instrument=False,
+    )
 except ImportError:
     pass
 
@@ -209,10 +214,12 @@ st.markdown(
   /* ── Response text ── */
   .response-text {
     font-size: 0.91rem;
-    line-height: 1.8;
+    line-height: 1.7;
     color: #1e293b;
     min-height: 120px;
-    white-space: pre-wrap;
+  }
+  .response-text p {
+    margin: 0.4em 0;
   }
 
   /* ── Meta row ── */
@@ -422,7 +429,7 @@ st.markdown('<div class="query-wrapper">', unsafe_allow_html=True)
 st.markdown('<div class="query-label">Consulta</div>', unsafe_allow_html=True)
 
 query = st.text_area(
-    label="",
+    label="Consulta",
     placeholder="Digite sua pergunta sobre regulamentação Pix…",
     height=85,
     key="query_input",
@@ -434,7 +441,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 example = st.selectbox(
-    label="",
+    label="Exemplo",
     options=["Selecione um exemplo…"] + EXAMPLE_QUERIES,
     key="example_select",
     label_visibility="collapsed",
@@ -473,8 +480,20 @@ if st.session_state.result_baseline and st.session_state.result_rag:
     def _esc(s: str) -> str:
         return html.escape(str(s)) if s else ""
 
-    bl_ans = _esc(bl["answer"])
-    rag_ans = _esc(rag["answer"])
+    def _format_answer(raw: str) -> str:
+        """Convert plain-text answer to HTML paragraphs with controlled spacing."""
+        if not raw:
+            return ""
+        paragraphs = raw.strip().split("\n\n")
+        parts = []
+        for p in paragraphs:
+            escaped = html.escape(p.strip())
+            escaped = escaped.replace("\n", "<br>")
+            parts.append(f"<p>{escaped}</p>")
+        return "".join(parts)
+
+    bl_ans = _format_answer(bl["answer"])
+    rag_ans = _format_answer(rag["answer"])
 
     # ── Metrics row ────────────────────────────────────────────────────────────
     latency_diff = rag["latency_ms"] - bl["latency_ms"]
