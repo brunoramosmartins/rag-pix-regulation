@@ -1,6 +1,6 @@
 [project]
 name = "rag-pix-regulation"
-version = "0.7.0"
+version = "1.1.0"
 description = "RAG system for querying Brazilian Pix regulatory documentation"
 requires-python = ">=3.10"
 authors = [{ name = "Bruno Ramos Martins" }]

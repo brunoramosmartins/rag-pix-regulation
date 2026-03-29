@@ -1,6 +1,13 @@
 """Data models for chunking stage."""
 
+import hashlib
+
 from pydantic import BaseModel, Field
+
+
+def compute_content_hash(text: str) -> str:
+    """Compute SHA-256 hash of text content for change detection."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 class Chunk(BaseModel):
@@ -21,6 +28,10 @@ class Chunk(BaseModel):
     source_file: str = Field(..., description="Source PDF filename.")
     text: str = Field(..., description="Chunk text content.")
     token_count: int = Field(..., ge=0, description="Number of tokens in chunk.")
+    content_hash: str = Field(
+        default="",
+        description="SHA-256 hash of text content for incremental indexing.",
+    )
     char_start: int | None = Field(
         default=None, description="Start offset in segment text."
     )

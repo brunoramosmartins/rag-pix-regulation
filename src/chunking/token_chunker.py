@@ -4,7 +4,7 @@ from typing import Iterable
 
 from transformers import AutoTokenizer
 
-from .models import Chunk, StructuralSegment
+from .models import Chunk, StructuralSegment, compute_content_hash
 
 DEFAULT_MODEL = "BAAI/bge-m3"
 DEFAULT_CHUNK_SIZE = 500
@@ -88,6 +88,7 @@ def chunk_segment(
                 source_file=segment.source_file,
                 text=chunk_text,
                 token_count=token_count,
+                content_hash=compute_content_hash(chunk_text),
                 char_start=segment.char_start,
                 char_end=segment.char_end,
             )
@@ -122,6 +123,7 @@ def chunk_segment(
                 source_file=segment.source_file,
                 text=chunk_text,
                 token_count=token_window_count,
+                content_hash=compute_content_hash(chunk_text),
                 char_start=None,
                 char_end=None,
             )
