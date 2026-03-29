@@ -85,6 +85,8 @@ def init_chunk_collection(
                 Property(name="article_numbers", data_type=DataType.TEXT_ARRAY),
                 Property(name="source_file", data_type=DataType.TEXT),
                 Property(name="text", data_type=DataType.TEXT),
+                Property(name="content_hash", data_type=DataType.TEXT),
+                Property(name="embedding_model", data_type=DataType.TEXT),
             ],
         )
         logger.info(
@@ -113,7 +115,9 @@ def validate_chunk_schema(client: weaviate.WeaviateClient | None = None) -> bool
     return True
 
 
-def chunk_to_weaviate_properties(chunk: Any) -> dict[str, Any]:
+def chunk_to_weaviate_properties(
+    chunk: Any, embedding_model: str = ""
+) -> dict[str, Any]:
     """Convert Chunk to Weaviate properties dict."""
     return {
         "chunk_id": chunk.chunk_id,
@@ -125,4 +129,6 @@ def chunk_to_weaviate_properties(chunk: Any) -> dict[str, Any]:
         "article_numbers": chunk.article_numbers or [],
         "source_file": chunk.source_file,
         "text": chunk.text,
+        "content_hash": getattr(chunk, "content_hash", ""),
+        "embedding_model": embedding_model,
     }

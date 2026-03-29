@@ -1,6 +1,6 @@
 {
   "description": "Canonical evaluation dataset — Manual Operacional do DICT. Single source for retrieval and RAG evaluation.",
-  "source_corpus": "manual_dict",
+  "source_corpus": "06_manual_operacional_dict",
   "difficulty_tiers": {
     "single_chunk": "Answer found in a single chunk",
     "multi_chunk": "Answer requires combining information from 2+ chunks",
@@ -13,7 +13,7 @@
       "query": "O que é o processo de Recuperação de Valores no Pix e qual é seu objetivo?",
       "difficulty": "single_chunk",
       "expected_pages": [122],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A Recuperação de Valores é um aprimoramento do MED para rastrear, bloquear e devolver recursos em transações Pix suspeitas de fraude ou golpe.",
       "key_concepts": [
         "rastreamento de transações",
@@ -30,7 +30,7 @@
       "query": "Quais são as principais etapas do processo de Recuperação de Valores no DICT?",
       "difficulty": "multi_chunk",
       "expected_pages": [123, 124],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O processo inclui as etapas: instauração, rastreamento, priorização, bloqueio, análise e devolução.",
       "key_concepts": [
         "fluxo estruturado",
@@ -46,7 +46,7 @@
       "query": "Quais são os possíveis estados de uma Recuperação de Valores no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [122],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Uma Recuperação de Valores pode ter os seguintes estados: CREATED, TRACKED, AWAITING_ANALYSIS, ANALYSED, REFUNDING, COMPLETED, CANCELLED.",
       "key_concepts": [
         "estados do processo",
@@ -61,7 +61,7 @@
       "query": "Quem pode abrir uma notificação de infração para solicitação de devolução?",
       "difficulty": "single_chunk",
       "expected_pages": [69],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A notificação de infração para solicitação de devolução pode ser aberta apenas pelo PSP do pagador quando há suspeita de fraude em uma transação Pix.",
       "key_concepts": [
         "PSP do pagador",
@@ -77,7 +77,7 @@
       "query": "Quais são os estados possíveis de uma notificação de infração no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [69],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Uma notificação de infração pode estar nos estados: aberta, recebida, analisada/concluída/fechada, cancelada.",
       "key_concepts": [
         "fluxo de tratamento de infração",
@@ -92,7 +92,7 @@
       "query": "Em que situações pode ser criada uma marcação de fraude transacional no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [84],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A marcação de fraude pode ser criada quando um PSP identifica envolvimento em fraude, como conta-laranja, conta de fraudador, acesso fraudulento ou outros.",
       "key_concepts": [
         "fraude transacional",
@@ -108,7 +108,7 @@
       "query": "Quais informações devem ser fornecidas ao criar uma marcação de fraude transacional no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [84],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Devem ser informados: CPF ou CNPJ do usuário suspeito, chave Pix (quando conhecida), tipo de fraude e informações adicionais sobre o caso.",
       "key_concepts": [
         "identificação do usuário",
@@ -124,7 +124,7 @@
       "query": "Qual é o prazo para que o PSP do pagador inicie uma solicitação de devolução após a conclusão da notificação de infração?",
       "difficulty": "single_chunk",
       "expected_pages": [105],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O PSP do pagador tem até 72 horas após a conclusão da notificação de infração para iniciar a solicitação de devolução.",
       "key_concepts": [
         "prazo de 72 horas",
@@ -140,7 +140,7 @@
       "query": "O valor solicitado para devolução em um processo de fraude pode ser maior que o valor da transação original?",
       "difficulty": "single_chunk",
       "expected_pages": [106, 130],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Não. O valor solicitado para devolução deve ser igual ou menor que o valor da transação original.",
       "key_concepts": [
         "limite de devolução",
@@ -156,7 +156,7 @@
       "query": "O que acontece quando uma solicitação de devolução é concluída no DICT?",
       "difficulty": "multi_chunk",
       "expected_pages": [106, 107],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A solicitação é marcada como concluída no DICT com um dos seguintes resultados: aceita total, aceita parcial ou rejeitada. O PSP do pagador consulta periodicamente essas solicitações concluídas.",
       "key_concepts": [
         "estados finais da devolução",
@@ -172,7 +172,7 @@
       "query": "Quais são os tipos de chaves Pix aceitos no DICT e seus formatos?",
       "difficulty": "single_chunk",
       "expected_pages": [5],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Os tipos de chave são: telefone celular (formato E.164), e-mail, CPF (11 dígitos), CNPJ (14 dígitos) e chave aleatória (EVP, UUID v4).",
       "key_concepts": [
         "tipos de chave Pix",
@@ -190,7 +190,7 @@
       "query": "Como o participante do Pix deve validar o número de telefone celular ou e-mail antes do registro da chave?",
       "difficulty": "single_chunk",
       "expected_pages": [6],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O participante deve enviar um código para o telefone ou e-mail e solicitar a inclusão desse código em algum canal de atendimento, validando a posse do dado.",
       "key_concepts": [
         "validação de posse",
@@ -206,7 +206,7 @@
       "query": "Quais verificações de conformidade o DICT realiza ao receber uma solicitação de registro de chave Pix?",
       "difficulty": "single_chunk",
       "expected_pages": [10],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O DICT verifica: i) se o PSP com acesso direto possui autorização para registrar chaves, e ii) se o PSP vinculado à chave é o mesmo do usuário final.",
       "key_concepts": [
         "verificação de conformidade",
@@ -222,7 +222,7 @@
       "query": "Como funciona o fluxo de registro de chave para participantes com acesso indireto ao DICT?",
       "difficulty": "multi_chunk",
       "expected_pages": [11, 12],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O PSP com acesso indireto solicita o registro ao PSP com acesso direto (liquidante no SPI), que encaminha a requisição ao DICT. A resposta segue o caminho inverso.",
       "key_concepts": [
         "acesso indireto",
@@ -238,7 +238,7 @@
       "query": "Quais verificações o DICT faz ao receber uma solicitação de exclusão de chave?",
       "difficulty": "single_chunk",
       "expected_pages": [20],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O DICT verifica: i) a chave está registrada, ii) o PSP que solicitou é o mesmo que efetuou o registro, e iii) a chave pertence ao usuário que solicitou a exclusão.",
       "key_concepts": [
         "exclusão de chave",
@@ -254,7 +254,7 @@
       "query": "Como funciona o fluxo de exclusão de chave para participantes com acesso indireto ao DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [21],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O PSP do usuário final inicia o processo de exclusão enviando a mensagem 'Diretório / Remover Vínculo' ao DICT através do PSP com acesso direto.",
       "key_concepts": [
         "exclusão via acesso indireto",
@@ -269,7 +269,7 @@
       "query": "O que é o processo de portabilidade de chave Pix e como ele é iniciado?",
       "difficulty": "single_chunk",
       "expected_pages": [24],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A portabilidade permite transferir uma chave de um PSP para outro. O PSP reivindicador inicia o pedido, que fica com status 'Aberto' no DICT aguardando resposta do PSP doador.",
       "key_concepts": [
         "portabilidade de chave",
@@ -286,7 +286,7 @@
       "query": "Qual o prazo que o usuário tem para confirmar ou cancelar uma portabilidade de chave Pix?",
       "difficulty": "single_chunk",
       "expected_pages": [30],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O usuário tem até sete dias para confirmar ou cancelar a portabilidade. Para cancelar, deve fazer validação ativa da chave.",
       "key_concepts": [
         "prazo de 7 dias",
@@ -302,7 +302,7 @@
       "query": "O que acontece quando o status da portabilidade é 'Confirmado' no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [35],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Quando confirmado, o DICT bloqueia a chave até o recebimento da confirmação pelo PSP reivindicador. O bloqueio impede consultas a essa chave.",
       "key_concepts": [
         "bloqueio de chave",
@@ -318,7 +318,7 @@
       "query": "O que é o fluxo de reivindicação de posse de chave Pix?",
       "difficulty": "single_chunk",
       "expected_pages": [40],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A reivindicação de posse ocorre quando um usuário deseja registrar uma chave que já pertence a outro usuário. O PSP doador consulta periodicamente reivindicações com status 'Aberto' no DICT.",
       "key_concepts": [
         "reivindicação de posse",
@@ -334,7 +334,7 @@
       "query": "Como funciona o fluxo de consulta de chave Pix pelo usuário pagador?",
       "difficulty": "multi_chunk",
       "expected_pages": [55, 56],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O usuário pagador insere a chave (manualmente ou via QR Code), o PSP verifica na base interna e, se não encontrar, consulta o DICT através do PSP com acesso direto.",
       "key_concepts": [
         "consulta de chave",
@@ -351,7 +351,7 @@
       "query": "O que é o processo de verificação de sincronismo no DICT e quais são seus conceitos fundamentais?",
       "difficulty": "single_chunk",
       "expected_pages": [61],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A verificação de sincronismo usa dois conceitos: CID (identificador de conteúdo, 256 bits gerado a partir de dados da chave) e VSync (verificador de sincronismo).",
       "key_concepts": [
         "sincronismo",
@@ -368,7 +368,7 @@
       "query": "Como funciona o fluxo de reconciliação de chaves por arquivo no DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [66],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O PSP com acesso direto solicita a lista de suas chaves por tipo específico através da mensagem 'Reconciliação / Criar Arquivo' ao DICT.",
       "key_concepts": [
         "reconciliação",
@@ -384,7 +384,7 @@
       "query": "Quais são os tipos de fraude reconhecidos na notificação de infração do DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [71],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Os tipos incluem: fraudulent_access (acesso e autorização fraudulenta por terceiro via engenharia social) e outros tipos de fraude transacional.",
       "key_concepts": [
         "fraudulent_access",
@@ -400,7 +400,7 @@
       "query": "Quais são os tipos de conta fraudadora reconhecidos na marcação de fraude do DICT?",
       "difficulty": "single_chunk",
       "expected_pages": [84],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Os tipos incluem: mule_account (conta-laranja aberta legitimamente para receber fraude), scammer_account (conta no nome do próprio fraudador) e other (outros).",
       "key_concepts": [
         "mule_account",
@@ -416,7 +416,7 @@
       "query": "O que é a funcionalidade checkKeys do DICT e quem pode usá-la?",
       "difficulty": "single_chunk",
       "expected_pages": [90],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "checkKeys é uma funcionalidade do DICT de uso exclusivo do PSP para confirmar a existência de chaves antes de enviar requisições. Não pode ser disponibilizada aos usuários.",
       "key_concepts": [
         "checkKeys",
@@ -432,7 +432,7 @@
       "query": "Como funciona a política de limitação de requisições à API do DICT?",
       "difficulty": "multi_chunk",
       "expected_pages": [91, 92],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Cada operação da API tem uma política de limitação com um 'balde' (margem para exceder o limite temporariamente). Diferentes operações têm limites específicos, como 70 requisições/min para checkKeys.",
       "key_concepts": [
         "rate limiting",
@@ -449,7 +449,7 @@
       "query": "O que é o cache de existência de chave Pix e qual sua finalidade?",
       "difficulty": "single_chunk",
       "expected_pages": [95],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O cache de existência permite ao PSP com acesso indireto armazenar localmente informações sobre existência de chaves, atualizado via lista do DICT.",
       "key_concepts": [
         "cache local",
@@ -465,7 +465,7 @@
       "query": "Qual o prazo máximo para o PSP do pagador solicitar devolução por falha operacional?",
       "difficulty": "single_chunk",
       "expected_pages": [100],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "A solicitação de devolução por falha operacional pode ser feita se a transação ocorreu nos últimos noventa dias.",
       "key_concepts": [
         "devolução por falha operacional",
@@ -481,7 +481,7 @@
       "query": "Como o PSP do recebedor deve agir ao receber uma solicitação de devolução por falha operacional?",
       "difficulty": "multi_chunk",
       "expected_pages": [100, 101],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O PSP do recebedor verifica se existem recursos disponíveis na conta. Caso existam, prossegue com a devolução. Caso não se trate de falha operacional ou não existam recursos, segue para rejeição.",
       "key_concepts": [
         "verificação de recursos",
@@ -497,7 +497,7 @@
       "query": "É possível cancelar uma devolução já aceita pelo PSP do pagador?",
       "difficulty": "single_chunk",
       "expected_pages": [110],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Sim, o PSP do pagador deve iniciar uma nova transação (pacs.008) para cancelar, pois não é possível devolver a devolução original via pacs.004.",
       "key_concepts": [
         "cancelamento de devolução",
@@ -513,7 +513,7 @@
       "query": "O que são as notificações de eventos no DICT e qual sua finalidade?",
       "difficulty": "single_chunk",
       "expected_pages": [140],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O endpoint de eventos é uma forma centralizada de consultar eventos no DICT que necessitem de ação de um PSP. Inicialmente, somente eventos da Recuperação de Valores são consultados.",
       "key_concepts": [
         "endpoint de eventos",
@@ -529,7 +529,7 @@
       "query": "Quais eventos existem relacionados à Recuperação de Valores no sistema de notificações?",
       "difficulty": "single_chunk",
       "expected_pages": [141],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Existe o evento FUNDS_RECOVERY_ANALYSED, que significa que a Recuperação de Valores teve seu status atualizado para ANALYSED.",
       "key_concepts": [
         "FUNDS_RECOVERY_ANALYSED",
@@ -545,7 +545,7 @@
       "query": "O que acontece com a chave durante o processo de reivindicação de posse quando o status é 'Confirmado'?",
       "difficulty": "cross_section",
       "expected_pages": [35, 36],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "Quando confirmado, o DICT bloqueia a chave e atualiza os dados vinculados, alterando o status da solicitação. O bloqueio impede consultas até a conclusão.",
       "key_concepts": [
         "bloqueio de chave",
@@ -562,7 +562,7 @@
       "query": "Quais regras se aplicam ao nome vinculado a uma chave Pix do tipo CPF ou CNPJ?",
       "difficulty": "multi_chunk",
       "expected_pages": [7, 8],
-      "expected_documents": ["manual_dict"],
+      "expected_documents": ["06_manual_operacional_dict"],
       "expected_answer_summary": "O nome não pode conter palavras inexistentes no registro da Receita Federal. Cada palavra deve ser grafada de forma idêntica, com exceções para diacríticos, hífens e caracteres especiais.",
       "key_concepts": [
         "nome vinculado à chave",

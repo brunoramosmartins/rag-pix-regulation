@@ -1,17 +1,24 @@
 # Document display aliases
-# Maps document_id (filename stem, lowercase) → human-readable name shown in citations and UI.
+# Maps document_id (filename stem, lowercase) -> human-readable name shown in citations and UI.
 # document_id is generated from the PDF filename: stem.lower().replace(" ", "_")
 
-# ── Current names (post-rename) ───────────────────────────────────────────────
+# Current corpus (numbered PDFs)
+01_manual_uso_marca_pix: "Manual de Uso da Marca Pix v1.6"
+02_manual_padroes_iniciacao_pix: "Manual de Padroes para Iniciacao do Pix v2.9.0"
+03_manual_fluxos_efetivacao_pix: "Manual de Fluxos de Efetivacao do Pix v2.1"
+04_requisitos_minimos_experiencia_usuario: "Requisitos Minimos para Experiencia do Usuario"
+05_manual_tempos_pix: "Manual de Tempos do Pix v7.0"
+06_manual_operacional_dict: "Manual Operacional do DICT (MED 2.0)"
+07_manual_resolucao_disputas: "Manual de Resolucao de Disputas v5.0"
+
+# Legacy names (pre-rename) -- kept for backward compatibility with old indexes
+x_manualoperacionaldodict: "Manual Operacional do DICT (MED 2.0)"
 manual_operacional_dict: "Manual Operacional do DICT (MED 2.0)"
 manual_tempos_pix: "Manual de Tempos do Pix v7.0"
-manual_interfaces_comunicacao: "Manual das Interfaces de Comunicação v1.12"
-manual_resolucao_disputas: "Manual de Resolução de Disputas v5.0"
+manual_interfaces_comunicacao: "Manual das Interfaces de Comunicacao v1.12"
+manual_resolucao_disputas: "Manual de Resolucao de Disputas v5.0"
 manual_fluxos_pix: "Manual de Fluxos do Pix v2.1"
-manual_iniciacao_pix: "Manual de Padrões para Iniciação do Pix v2.9.0"
+manual_iniciacao_pix: "Manual de Padroes para Iniciacao do Pix v2.9.0"
 manual_marca_pix: "Manual de Uso da Marca Pix v1.6"
-
-# ── Legacy names (pre-rename) — remove after full re-index ───────────────────
-x_manualoperacionaldodict: "Manual Operacional do DICT (MED 2.0)"
 ix_manualdtempsdopix: "Manual de Tempos do Pix v7.0"
-xi_manual_de_resolucao_de_disputa: "Manual de Resolução de Disputas v5.0"
+xi_manual_de_resolucao_de_disputa: "Manual de Resolucao de Disputas v5.0"

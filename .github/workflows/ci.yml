@@ -34,7 +34,8 @@ jobs:
         run: |
           pip install pydantic pydantic-settings pymupdf pytest pytest-cov \
                       transformers weaviate-client numpy pyyaml \
-                      python-json-logger ollama
+                      python-json-logger ollama requests \
+                      sentence-transformers opentelemetry-api
 
       - name: Run unit tests with coverage
         run: |
